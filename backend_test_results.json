@@ -1,0 +1,130 @@
+{
+  "summary": {
+    "total_tests": 20,
+    "passed_tests": 20,
+    "success_rate": 1.0,
+    "timestamp": "2026-04-03T04:08:01.258760"
+  },
+  "test_results": [
+    {
+      "test": "Protected settings (no auth)",
+      "success": true,
+      "details": "Status: 401",
+      "timestamp": "2026-04-03T04:07:59.681635"
+    },
+    {
+      "test": "Protected system/info (no auth)",
+      "success": true,
+      "details": "Status: 401",
+      "timestamp": "2026-04-03T04:07:59.733003"
+    },
+    {
+      "test": "Protected files/browse (no auth)",
+      "success": true,
+      "details": "Status: 401",
+      "timestamp": "2026-04-03T04:07:59.781589"
+    },
+    {
+      "test": "Protected wallpapers (no auth)",
+      "success": true,
+      "details": "Status: 401",
+      "timestamp": "2026-04-03T04:07:59.828930"
+    },
+    {
+      "test": "Admin Login",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-04-03T04:08:00.105412"
+    },
+    {
+      "test": "Get Current User",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-04-03T04:08:00.158525"
+    },
+    {
+      "test": "User Registration",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-04-03T04:08:00.436201"
+    },
+    {
+      "test": "Logout",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-04-03T04:08:00.487363"
+    },
+    {
+      "test": "Re-login for Tests",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-04-03T04:08:00.759832"
+    },
+    {
+      "test": "Get Settings",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-04-03T04:08:00.823303"
+    },
+    {
+      "test": "Update Settings",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-04-03T04:08:00.886928"
+    },
+    {
+      "test": "Get System Info",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-04-03T04:08:01.044251"
+    },
+    {
+      "test": "System Info Structure",
+      "success": true,
+      "details": "",
+      "timestamp": "2026-04-03T04:08:01.044290"
+    },
+    {
+      "test": "Get Processes",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-04-03T04:08:01.101301"
+    },
+    {
+      "test": "Processes List",
+      "success": true,
+      "details": "Found 20 processes",
+      "timestamp": "2026-04-03T04:08:01.101353"
+    },
+    {
+      "test": "Browse Root Directory",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-04-03T04:08:01.153865"
+    },
+    {
+      "test": "Root Directory Entries",
+      "success": true,
+      "details": "Found 5 entries",
+      "timestamp": "2026-04-03T04:08:01.153902"
+    },
+    {
+      "test": "Browse Documents",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-04-03T04:08:01.207291"
+    },
+    {
+      "test": "Get Wallpapers",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-04-03T04:08:01.258596"
+    },
+    {
+      "test": "Wallpapers List",
+      "success": true,
+      "details": "Found 4 wallpapers",
+      "timestamp": "2026-04-03T04:08:01.258636"
+    }
+  ]
+}
