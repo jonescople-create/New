@@ -95,6 +95,7 @@ const DISCOUNT_CODES = {
   IFG20: { discount_pct: 20, description: '20% off your first ebook', active: true },
   FRUIT10: { discount_pct: 10, description: '10% off any recipe pack', active: true },
   CHALLENGE25: { discount_pct: 25, description: '25% off — Daily Challenge reward', active: true },
+  FRIEND15: { discount_pct: 15, description: '15% off — Referral reward for you and your friend', active: true },
 };
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -288,15 +289,21 @@ app.post('/api/subscribe', async (req, res) => {
     const email = String(req.body.email || '').trim().toLowerCase();
     if (!email || !email.includes('@')) return res.status(400).json({ detail: 'Invalid email' });
 
+    // Determine discount based on referral code
+    const refCode = String(req.body.referral_code || req.body.discount_code || '');
+    const isReferral = refCode.startsWith('REF_');
+    const discountCode = isReferral ? 'FRIEND15' : 'IFG20';
+    const discountPct = isReferral ? 15 : 20;
+
     if (supabase) {
       const { data: existing } = await supabase.from('email_captures').select('email').eq('email', email).single();
       if (existing) return res.json({
-        status: 'already_subscribed', email, discount_code: 'IFG20', discount_pct: 20,
-        message: "You're already subscribed! Your code IFG20 is still valid." });
+        status: 'already_subscribed', email, discount_code: discountCode, discount_pct: discountPct,
+        message: `You're already subscribed! Your code ${discountCode} is still valid.` });
 
+      const source = isReferral ? `referral:${refCode}` : (req.body.source || 'game');
       await supabase.from('email_captures').insert({
-        email, source: req.body.source || 'game',
-        captured_at: new Date().toISOString(), unsubscribed: false,
+        email, source, captured_at: new Date().toISOString(), unsubscribed: false,
       });
     }
 
@@ -304,13 +311,15 @@ app.post('/api/subscribe', async (req, res) => {
     if (resend) {
       resend.emails.send({
         from: SENDER_EMAIL, to: [email],
-        subject: 'Welcome! Your 20% OFF Code: IFG20 + Free Fruit Guide',
-        html: buildWelcomeHtml(),
+        subject: isReferral
+          ? `🎁 Your friend's gift: ${discountPct}% OFF! Code: ${discountCode}`
+          : `Welcome! Your ${discountPct}% OFF Code: ${discountCode} + Free Fruit Guide`,
+        html: buildWelcomeHtml(discountCode, discountPct, isReferral),
       }).then(r => console.log('Email sent:', r)).catch(e => console.warn('Email error:', e));
     }
 
-    res.json({ status: 'subscribed', email, discount_code: 'IFG20', discount_pct: 20,
-      message: 'Welcome! Use code IFG20 for 20% off your first ebook. Your free Caribbean Fruit Guide PDF is on its way!' });
+    res.json({ status: 'subscribed', email, discount_code: discountCode, discount_pct: discountPct,
+      message: `Welcome! Use code ${discountCode} for ${discountPct}% off your first ebook. Your free Caribbean Fruit Guide PDF is on its way!` });
   } catch (e) { res.status(500).json({ detail: e.message }); }
 });
 
@@ -323,6 +332,82 @@ app.get('/api/subscribe/check/:email', async (req, res) => {
     }
     res.json({ subscribed: false });
   } catch { res.json({ subscribed: false }); }
+});
+
+// ── Referral system ─────────────────────────────────────────────────────────────
+function makeRefCode(email) {
+  const b64 = Buffer.from(email).toString('base64url');
+  return `REF_${b64.slice(0, 16)}`;
+}
+
+function decodeRefCode(refCode) {
+  try {
+    if (!refCode.startsWith('REF_')) return null;
+    const encoded = refCode.slice(4);
+    return Buffer.from(encoded, 'base64url').toString('utf8');
+  } catch { return null; }
+}
+
+app.post('/api/referral/generate', (req, res) => {
+  try {
+    const email = String(req.body.email || '').trim().toLowerCase();
+    if (!email || !email.includes('@')) return res.status(400).json({ detail: 'Valid email required' });
+    const playerName = String(req.body.player_name || 'Player').slice(0, 20);
+    const score = Number(req.body.score) || 0;
+    const refCode = makeRefCode(email);
+    const siteUrl = FRONTEND_URL || 'https://islandfruitguide.com';
+    const shareUrl = `${siteUrl}/fruit-game?ref=${refCode}`;
+    res.json({
+      ref_code: refCode, share_url: shareUrl,
+      discount_code: 'FRIEND15', discount_pct: 15,
+      message: 'Share this link! When a friend signs up, you BOTH get 15% off any ebook.',
+      referrer_email: email, referrer_name: playerName, score,
+    });
+  } catch (e) { res.status(500).json({ detail: e.message }); }
+});
+
+app.get('/api/referral/validate/:ref_code', (req, res) => {
+  const email = decodeRefCode(req.params.ref_code);
+  if (email) {
+    return res.json({ valid: true, ref_code: req.params.ref_code, discount_code: 'FRIEND15', discount_pct: 15,
+      message: 'Your friend invited you! Sign up to get 15% off any ebook.' });
+  }
+  res.json({ valid: false });
+});
+
+// ── PayPal purchase confirmation (send email after capture) ───────────────────
+app.post('/api/pay/confirm', async (req, res) => {
+  try {
+    const { customer_email, product_name, amount, order_id } = req.body;
+    if (!customer_email || !product_name) return res.status(400).json({ detail: 'customer_email and product_name required' });
+
+    // Update purchase status in Supabase
+    if (supabase && order_id) {
+      await supabase.from('purchases').update({ status: 'completed' }).eq('id', order_id);
+    }
+
+    // Add to email_captures if not already subscribed
+    if (supabase) {
+      const { data: existing } = await supabase.from('email_captures').select('email').eq('email', customer_email.toLowerCase()).single();
+      if (!existing) {
+        await supabase.from('email_captures').insert({
+          email: customer_email.toLowerCase(), source: 'purchase',
+          captured_at: new Date().toISOString(), unsubscribed: false,
+        });
+      }
+    }
+
+    // Send purchase confirmation email
+    if (resend) {
+      resend.emails.send({
+        from: SENDER_EMAIL, to: [customer_email],
+        subject: `Order Confirmed: ${product_name} — Your Caribbean Ebook is Ready!`,
+        html: buildPurchaseHtml(product_name, amount || 0, order_id || 'N/A'),
+      }).then(() => console.log('Purchase email sent')).catch(e => console.warn('Email error:', e));
+    }
+
+    res.json({ status: 'confirmed', message: 'Purchase confirmed and email sent.' });
+  } catch (e) { res.status(500).json({ detail: e.message }); }
 });
 
 app.post('/api/discount/validate', async (req, res) => {
@@ -423,29 +508,55 @@ app.get('/api/admin/orders', verifyToken, async (req, res) => {
 });
 
 // ── Email HTML builder ──────────────────────────────────────────────────────────
-function buildWelcomeHtml() {
+function buildWelcomeHtml(code = 'IFG20', pct = 20, isReferral = false) {
+  const banner = isReferral ? 'Your friend shared a special offer just for you!' : 'Your Caribbean fruit journey starts here';
+  const intro = isReferral ? 'A friend referred you — here is your exclusive reward:' : "Thank you for joining! Here's your exclusive discount:";
+  const siteUrl = FRONTEND_URL || 'https://islandfruitguide.com';
   return `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#f9f9f9;padding:0;">
     <div style="background:linear-gradient(135deg,#1F7A4D,#0A2010);padding:32px 24px;text-align:center;">
       <h1 style="color:#F9A825;font-size:28px;margin:0;">Welcome to IslandFruitGuide!</h1>
-      <p style="color:#ffffffcc;font-size:14px;margin-top:8px;">Your Caribbean fruit journey starts here</p>
+      <p style="color:#ffffffcc;font-size:14px;margin-top:8px;">${banner}</p>
     </div>
     <div style="background:#ffffff;padding:32px 24px;">
-      <p style="color:#333;font-size:16px;line-height:1.6;">Thank you for joining! Here's your exclusive discount:</p>
+      <p style="color:#333;font-size:16px;line-height:1.6;">${intro}</p>
       <div style="background:#FFF8E1;border:2px dashed #F9A825;border-radius:12px;padding:24px;text-align:center;margin:24px 0;">
         <p style="color:#666;font-size:12px;text-transform:uppercase;letter-spacing:2px;margin:0 0 8px;">Your Discount Code</p>
-        <p style="color:#1F7A4D;font-size:36px;font-weight:900;letter-spacing:4px;margin:0;">IFG20</p>
-        <p style="color:#333;font-size:14px;margin-top:8px;font-weight:bold;">20% off your first ebook purchase</p>
+        <p style="color:#1F7A4D;font-size:36px;font-weight:900;letter-spacing:4px;margin:0;">${code}</p>
+        <p style="color:#333;font-size:14px;margin-top:8px;font-weight:bold;">${pct}% off ${isReferral ? 'any ebook — share and earn together!' : 'your first ebook purchase'}</p>
       </div>
-      <p style="color:#333;font-size:14px;line-height:1.6;">
-        <strong>Your FREE Caribbean Fruit Guide</strong> covers 10 tropical fruits with health benefits and quick recipes.
-      </p>
+      <p style="color:#333;font-size:14px;line-height:1.6;"><strong>Your FREE Caribbean Fruit Guide</strong> covers 10 tropical fruits with health benefits and quick recipes.</p>
       <div style="text-align:center;margin:24px 0;">
-        <a href="${FRONTEND_URL || 'https://islandfruitguide.com'}/store" style="display:inline-block;background:#1F7A4D;color:#fff;font-weight:bold;text-decoration:none;padding:14px 32px;border-radius:8px;font-size:16px;">
-          Browse Our Store &rarr;
-        </a>
+        <a href="${siteUrl}/store" style="display:inline-block;background:#1F7A4D;color:#fff;font-weight:bold;text-decoration:none;padding:14px 32px;border-radius:8px;font-size:16px;">Browse Our Store &rarr;</a>
       </div>
       <hr style="border:none;border-top:1px solid #eee;margin:24px 0;">
       <p style="color:#999;font-size:11px;text-align:center;">IslandFruitGuide.com &bull; Unsubscribe anytime</p>
+    </div>
+  </div>`;
+}
+
+function buildPurchaseHtml(productName, amount, orderId) {
+  const siteUrl = FRONTEND_URL || 'https://islandfruitguide.com';
+  return `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#f9f9f9;padding:0;">
+    <div style="background:linear-gradient(135deg,#1F7A4D,#0A2010);padding:32px 24px;text-align:center;">
+      <h1 style="color:#F9A825;font-size:28px;margin:0;">Purchase Confirmed!</h1>
+      <p style="color:#ffffffcc;font-size:14px;margin-top:8px;">Thank you for your order</p>
+    </div>
+    <div style="background:#ffffff;padding:32px 24px;">
+      <div style="background:#F1F8F4;border:1px solid #1F7A4D;border-radius:12px;padding:24px;margin:24px 0;">
+        <p style="color:#666;font-size:12px;text-transform:uppercase;letter-spacing:2px;margin:0 0 12px;">Order Summary</p>
+        <p style="color:#1F7A4D;font-size:20px;font-weight:900;margin:0 0 8px;">${productName}</p>
+        <p style="color:#333;font-size:18px;font-weight:bold;margin:0;">Total Paid: <span style="color:#1F7A4D;">$${Number(amount).toFixed(2)} USD</span></p>
+        <p style="color:#999;font-size:11px;margin-top:12px;">Order ID: ${orderId}</p>
+      </div>
+      <div style="text-align:center;margin:24px 0;">
+        <a href="${siteUrl}/store" style="display:inline-block;background:#1F7A4D;color:#fff;font-weight:bold;text-decoration:none;padding:14px 32px;border-radius:8px;font-size:16px;">Explore More Ebooks &rarr;</a>
+      </div>
+      <div style="background:#FFF8E1;border:2px dashed #F9A825;border-radius:8px;padding:16px;text-align:center;margin:0 0 24px;">
+        <p style="color:#666;font-size:12px;margin:0 0 6px;">Share &amp; Earn! Refer a friend to get</p>
+        <p style="color:#1F7A4D;font-size:24px;font-weight:900;letter-spacing:3px;margin:0;">FRIEND15 — 15% OFF</p>
+        <p style="color:#333;font-size:12px;margin-top:6px;">Go to the Fruit Catcher game &rarr; Share Score to get your referral link</p>
+      </div>
+      <p style="color:#999;font-size:11px;text-align:center;">IslandFruitGuide.com</p>
     </div>
   </div>`;
 }

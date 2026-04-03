@@ -515,7 +515,7 @@ export function FruitGame() {
           challengeReward={challengeReward || undefined} />
       )}
       {overlay === 'share' && (
-        <ShareScoreModal score={score} highScore={highScore} level={gameStats.level} achievementCount={achUnlocked.size} onClose={() => setOverlay('none')} />
+        <ShareScoreModal score={score} highScore={highScore} level={gameStats.level} achievementCount={achUnlocked.size} onClose={() => setOverlay('none')} playerEmail={capturedEmail} playerName={playerName} />
       )}
       {overlay === 'achievements' && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.82)' }} onClick={() => setOverlay('none')}>

@@ -86,6 +86,9 @@ class PayPalOrderRequest(BaseModel):
 
 class PayPalCaptureRequest(BaseModel):
     order_id: str
+    customer_email: Optional[str] = None
+    product_name: Optional[str] = None
+    amount: Optional[float] = None
 
 
 class OrderResponse(BaseModel):
@@ -1334,13 +1337,38 @@ async def create_paypal_order(order_request: PayPalOrderRequest):
 @app.post("/api/paypal/capture-order")
 async def capture_paypal_order(capture_request: PayPalCaptureRequest):
     """
-    Capture/Execute a PayPal payment after approval
+    Capture/Execute a PayPal payment after approval + send confirmation email
     """
     try:
         payment = paypalrestsdk.Payment.find(capture_request.order_id)
         
         if payment.execute({"payer_id": capture_request.order_id}):
             logger.info(f"Payment executed successfully: {payment.id}")
+
+            # Send purchase confirmation email (non-blocking)
+            try:
+                email = capture_request.customer_email
+                # Also try to get email from payment object
+                if not email:
+                    try:
+                        email = payment.payer.get('payer_info', {}).get('email')
+                    except Exception:
+                        pass
+                if email:
+                    product_name = capture_request.product_name or 'your ebook'
+                    amount = capture_request.amount or 0
+                    import threading
+                    threading.Thread(
+                        target=_send_purchase_email,
+                        args=(email, product_name, amount, payment.id),
+                        daemon=True
+                    ).start()
+                    # Also add to email_captures if not already there
+                    if not supabase_db.check_email_capture(email):
+                        supabase_db.add_email_capture(email, source='purchase')
+            except Exception as email_err:
+                logger.warning(f"Purchase email failed (non-blocking): {email_err}")
+
             return {
                 "id": payment.id,
                 "state": payment.state,
@@ -1568,6 +1596,7 @@ class EmailSubscriber(BaseModel):
     source: str = 'game'
     interest: str = 'general'
     discount_code: str = ''
+    referral_code: str = ''
 
 class DailyChallengeResponse(BaseModel):
     target_score: int
@@ -1614,11 +1643,12 @@ DISCOUNT_CODES = {
     'IFG20': {'discount_pct': 20, 'description': '20% off your first ebook', 'active': True},
     'FRUIT10': {'discount_pct': 10, 'description': '10% off any recipe pack', 'active': True},
     'CHALLENGE25': {'discount_pct': 25, 'description': '25% off — Daily Challenge reward', 'active': True},
+    'FRIEND15': {'discount_pct': 15, 'description': '15% off — Referral reward for you and your friend', 'active': True},
 }
 
 @app.post("/api/subscribe")
 def subscribe_email(subscriber: EmailSubscriber):
-    """Subscribe email, send discount code IFG20 + track"""
+    """Subscribe email, send discount code IFG20 (or FRIEND15 with referral) + track"""
     try:
         email = subscriber.email.strip().lower()
         if not email or '@' not in email:
@@ -1626,34 +1656,45 @@ def subscribe_email(subscriber: EmailSubscriber):
 
         # Check if already captured in Supabase
         existing = supabase_db.check_email_capture(email)
+        discount_code = 'IFG20'
+        discount_pct = 20
+
+        # Check for referral code — upgrade to FRIEND15
+        ref_code = getattr(subscriber, 'referral_code', None) or subscriber.discount_code
+        if ref_code and ref_code.startswith('REF_'):
+            discount_code = 'FRIEND15'
+            discount_pct = 15
+
         if existing:
             return {
                 "status": "already_subscribed",
                 "email": email,
-                "discount_code": "IFG20",
-                "discount_pct": 20,
-                "message": "You're already subscribed! Your code IFG20 is still valid."
+                "discount_code": discount_code,
+                "discount_pct": discount_pct,
+                "message": f"You're already subscribed! Your code {discount_code} is still valid."
             }
 
         # Insert into email_captures
-        supabase_db.add_email_capture(email, source=subscriber.source)
+        source = subscriber.source
+        if ref_code and ref_code.startswith('REF_'):
+            source = f'referral:{ref_code}'
+        supabase_db.add_email_capture(email, source=source)
 
-        logger.info(f"New subscriber: {email} from {subscriber.source}")
+        logger.info(f"New subscriber: {email} from {source}")
 
-        # Send welcome email with IFG20 code via Resend (async, non-blocking)
+        # Send welcome email with discount code via Resend (async, non-blocking)
         try:
-            import asyncio
             import threading
-            threading.Thread(target=_send_welcome_email, args=(email,), daemon=True).start()
+            threading.Thread(target=_send_welcome_email, args=(email, discount_code, discount_pct), daemon=True).start()
         except Exception as email_err:
             logger.warning(f"Email send failed (non-blocking): {email_err}")
 
         return {
             "status": "subscribed",
             "email": email,
-            "discount_code": "IFG20",
-            "discount_pct": 20,
-            "message": "Welcome! Use code IFG20 for 20% off your first ebook. Your free Caribbean Fruit Guide PDF is on its way!"
+            "discount_code": discount_code,
+            "discount_pct": discount_pct,
+            "message": f"Welcome! Use code {discount_code} for {discount_pct}% off your first ebook. Your free Caribbean Fruit Guide PDF is on its way!"
         }
     except HTTPException:
         raise
@@ -1673,6 +1714,75 @@ def check_subscriber(email: str):
     except Exception as e:
         logger.error(f"Error checking subscriber: {str(e)}")
         return {"subscribed": False}
+
+
+# ── Referral System ────────────────────────────────────────────────────────────
+
+import base64 as _b64
+
+def _make_ref_code(email: str) -> str:
+    """Generate a short deterministic referral code from email"""
+    encoded = _b64.urlsafe_b64encode(email.encode()).decode().rstrip('=')
+    return f"REF_{encoded[:16]}"
+
+def _decode_ref_code(ref_code: str) -> Optional[str]:
+    """Decode referral code back to email"""
+    try:
+        if not ref_code.startswith('REF_'):
+            return None
+        encoded = ref_code[4:]
+        # Add padding
+        padding = 4 - len(encoded) % 4
+        if padding != 4:
+            encoded += '=' * padding
+        return _b64.urlsafe_b64decode(encoded).decode()
+    except Exception:
+        return None
+
+@app.post("/api/referral/generate")
+def generate_referral(request_data: dict):
+    """Generate a referral link for a player after they share their score"""
+    try:
+        email = str(request_data.get('email', '')).strip().lower()
+        player_name = str(request_data.get('player_name', 'Player'))[:20]
+        score = int(request_data.get('score', 0))
+
+        if not email or '@' not in email:
+            raise HTTPException(status_code=400, detail="Valid email required to generate referral link")
+
+        ref_code = _make_ref_code(email)
+        frontend_url = os.environ.get('FRONTEND_URL', 'https://islandfruitguide.com')
+        share_url = f"{frontend_url}/fruit-game?ref={ref_code}"
+
+        return {
+            "ref_code": ref_code,
+            "share_url": share_url,
+            "discount_code": "FRIEND15",
+            "discount_pct": 15,
+            "message": "Share this link! When a friend signs up using it, you BOTH get 15% off any ebook.",
+            "referrer_email": email,
+            "referrer_name": player_name,
+            "score": score,
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Referral generate error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/referral/validate/{ref_code}")
+def validate_referral(ref_code: str):
+    """Validate a referral code before use"""
+    referrer_email = _decode_ref_code(ref_code)
+    if referrer_email:
+        return {
+            "valid": True,
+            "ref_code": ref_code,
+            "discount_code": "FRIEND15",
+            "discount_pct": 15,
+            "message": "Your friend invited you! Sign up to get 15% off any ebook.",
+        }
+    return {"valid": False}
 
 @app.post("/api/discount/validate")
 async def validate_discount(request: Request):
@@ -1730,13 +1840,48 @@ async def daily_challenge():
     """Get today's daily challenge"""
     return get_daily_challenge()
 
-@app.post("/api/game/daily-challenge/complete")
+@app.post("/api/pay/confirm")
+async def confirm_purchase(request: Request):
+    """Confirm a purchase after PayPal capture — update Supabase + send email"""
+    try:
+        body = await request.json()
+        customer_email = body.get('customer_email', '')
+        product_name = body.get('product_name', 'your ebook')
+        amount = float(body.get('amount', 0))
+        order_id = body.get('order_id', '')
+
+        if not customer_email or '@' not in customer_email:
+            raise HTTPException(status_code=400, detail="customer_email required")
+
+        # Update purchase status in Supabase
+        if order_id:
+            supabase_db._request('PATCH', f'purchases?id=eq.{order_id}', json={'status': 'completed'})
+
+        # Add to email_captures if new
+        if not supabase_db.check_email_capture(customer_email):
+            supabase_db.add_email_capture(customer_email, source='purchase')
+
+        # Send confirmation email non-blocking
+        import threading
+        threading.Thread(
+            target=_send_purchase_email,
+            args=(customer_email, product_name, amount, order_id),
+            daemon=True
+        ).start()
+
+        return {"status": "confirmed", "message": "Purchase confirmed and email sent."}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error confirming purchase: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 async def complete_daily_challenge(request: Request):
     """Mark daily challenge as complete and issue reward"""
     try:
         request_data = await request.json()
         score = request_data.get('score', 0)
-        player_name = request_data.get('player_name', 'Anonymous')
         email = request_data.get('email')
 
         challenge = get_daily_challenge()
@@ -2061,26 +2206,32 @@ if RESEND_API_KEY:
     resend.api_key = RESEND_API_KEY
     logger.info("Resend email configured")
 
-def _send_welcome_email(to_email: str):
-    """Send welcome email with IFG20 discount code (sync, called via to_thread)"""
+def _send_welcome_email(to_email: str, discount_code: str = 'IFG20', discount_pct: int = 20):
+    """Send welcome email with discount code (sync, called via thread)"""
     if not RESEND_API_KEY:
         logger.warning("No RESEND_API_KEY — skipping email")
         return
-    
+
+    is_referral = discount_code == 'FRIEND15'
+    banner_msg = (
+        "Your friend shared a special referral offer just for you!" if is_referral
+        else "Your Caribbean fruit journey starts here"
+    )
+
     html = f"""
     <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#f9f9f9;padding:0;">
       <div style="background:linear-gradient(135deg,#1F7A4D,#0A2010);padding:32px 24px;text-align:center;">
         <h1 style="color:#F9A825;font-size:28px;margin:0;">Welcome to IslandFruitGuide!</h1>
-        <p style="color:#ffffffcc;font-size:14px;margin-top:8px;">Your Caribbean fruit journey starts here</p>
+        <p style="color:#ffffffcc;font-size:14px;margin-top:8px;">{banner_msg}</p>
       </div>
       <div style="background:#ffffff;padding:32px 24px;">
         <p style="color:#333;font-size:16px;line-height:1.6;">
-          Thank you for joining! Here's your exclusive discount:
+          {'A friend referred you — here is your exclusive referral reward:' if is_referral else 'Thank you for joining! Here is your exclusive discount:'}
         </p>
         <div style="background:#FFF8E1;border:2px dashed #F9A825;border-radius:12px;padding:24px;text-align:center;margin:24px 0;">
           <p style="color:#666;font-size:12px;text-transform:uppercase;letter-spacing:2px;margin:0 0 8px;">Your Discount Code</p>
-          <p style="color:#1F7A4D;font-size:36px;font-weight:900;letter-spacing:4px;margin:0;">IFG20</p>
-          <p style="color:#333;font-size:14px;margin-top:8px;font-weight:bold;">20% off your first ebook purchase</p>
+          <p style="color:#1F7A4D;font-size:36px;font-weight:900;letter-spacing:4px;margin:0;">{discount_code}</p>
+          <p style="color:#333;font-size:14px;margin-top:8px;font-weight:bold;">{discount_pct}% off {'any ebook — share and earn together!' if is_referral else 'your first ebook purchase'}</p>
         </div>
         <p style="color:#333;font-size:14px;line-height:1.6;">
           <strong>Your FREE Caribbean Fruit Guide</strong> is attached below with profiles of 10 tropical fruits, health benefits, and quick recipes.
@@ -2092,24 +2243,86 @@ def _send_welcome_email(to_email: str):
         </div>
         <hr style="border:none;border-top:1px solid #eee;margin:24px 0;">
         <p style="color:#999;font-size:11px;text-align:center;">
-          IslandFruitGuide.com &bull; Caribbean Fruits, Recipes & Digital Guides<br>
+          IslandFruitGuide.com &bull; Caribbean Fruits, Recipes &amp; Digital Guides<br>
           Unsubscribe anytime by replying to this email.
         </p>
       </div>
     </div>
     """
-    
+
     try:
+        subject = (
+            f"Gift from a friend: {discount_pct}% OFF! Code: {discount_code}"
+            if is_referral else
+            f"Welcome! Your {discount_pct}% OFF Code: {discount_code} + Free Fruit Guide"
+        )
         result = resend.Emails.send({
             "from": SENDER_EMAIL,
             "to": [to_email],
-            "subject": "Welcome! Your 20% OFF Code: IFG20 + Free Fruit Guide",
+            "subject": subject,
             "html": html,
         })
         logger.info(f"Welcome email sent to {to_email}: {result}")
         return result
     except Exception as e:
         logger.error(f"Resend email error: {e}")
+        raise
+
+
+def _send_purchase_email(to_email: str, product_name: str, amount: float, order_id: str):
+    """Send purchase confirmation email via Resend"""
+    if not RESEND_API_KEY:
+        logger.warning("No RESEND_API_KEY — skipping purchase email")
+        return
+
+    html = f"""
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#f9f9f9;padding:0;">
+      <div style="background:linear-gradient(135deg,#1F7A4D,#0A2010);padding:32px 24px;text-align:center;">
+        <h1 style="color:#F9A825;font-size:28px;margin:0;">Purchase Confirmed!</h1>
+        <p style="color:#ffffffcc;font-size:14px;margin-top:8px;">Thank you for your order</p>
+      </div>
+      <div style="background:#ffffff;padding:32px 24px;">
+        <p style="color:#333;font-size:16px;line-height:1.6;">
+          Your payment was successful. Here are your order details:
+        </p>
+        <div style="background:#F1F8F4;border:1px solid #1F7A4D;border-radius:12px;padding:24px;margin:24px 0;">
+          <p style="color:#666;font-size:12px;text-transform:uppercase;letter-spacing:2px;margin:0 0 12px;">Order Summary</p>
+          <p style="color:#1F7A4D;font-size:20px;font-weight:900;margin:0 0 8px;">{product_name}</p>
+          <p style="color:#333;font-size:18px;font-weight:bold;margin:0;">Total Paid: <span style="color:#1F7A4D;">${amount:.2f} USD</span></p>
+          <p style="color:#999;font-size:11px;margin-top:12px;">Order ID: {order_id}</p>
+        </div>
+        <p style="color:#333;font-size:14px;line-height:1.6;">
+          Your ebook will be delivered to your downloads within 24 hours. Check your email for the download link.
+        </p>
+        <div style="text-align:center;margin:24px 0;">
+          <a href="https://islandfruitguide.com/store" style="display:inline-block;background:#1F7A4D;color:#fff;font-weight:bold;text-decoration:none;padding:14px 32px;border-radius:8px;font-size:16px;">
+            Explore More Ebooks &rarr;
+          </a>
+        </div>
+        <div style="background:#FFF8E1;border:2px dashed #F9A825;border-radius:8px;padding:16px;text-align:center;margin:0 0 24px;">
+          <p style="color:#666;font-size:12px;margin:0 0 6px;">Share &amp; Earn! Refer a friend to get</p>
+          <p style="color:#1F7A4D;font-size:24px;font-weight:900;letter-spacing:3px;margin:0;">15% OFF</p>
+          <p style="color:#333;font-size:12px;margin-top:6px;">Go to the Fruit Catcher game &rarr; Share Score to get your referral link</p>
+        </div>
+        <hr style="border:none;border-top:1px solid #eee;margin:24px 0;">
+        <p style="color:#999;font-size:11px;text-align:center;">
+          IslandFruitGuide.com &bull; Caribbean Fruits, Recipes &amp; Digital Guides
+        </p>
+      </div>
+    </div>
+    """
+
+    try:
+        result = resend.Emails.send({
+            "from": SENDER_EMAIL,
+            "to": [to_email],
+            "subject": f"Order Confirmed: {product_name} — Your Caribbean Ebook is Ready!",
+            "html": html,
+        })
+        logger.info(f"Purchase email sent to {to_email}: {result}")
+        return result
+    except Exception as e:
+        logger.error(f"Resend purchase email error: {e}")
         raise
 
 

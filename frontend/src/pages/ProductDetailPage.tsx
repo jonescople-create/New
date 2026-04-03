@@ -38,7 +38,7 @@ function ResolveCover({ slug }: { slug: string }) {
   if (slug === 'papaya-recipe-pack')              return <PapayaRecipeCover {...props} />;
   if (slug === 'soursop-drinks-pack')             return <SoursopDrinksCover {...props} />;
   if (slug === 'guava-dessert-pack')              return <GuavaDessertCover {...props} />;
-  if (slug === 'gym-energy-recipes')             return <GymEnergyBookCover {...props} />;
+  if (slug === 'gym-energy' || slug === 'gym-energy-recipes')  return <GymEnergyBookCover {...props} />;
   if (slug === 'fat-loss-smoothies')             return <FatLossSmoothiesBookCover {...props} />;
   if (slug === 'healing-drinks')                 return <HealingDrinksBookCover {...props} />;
   if (slug === 'pre-workout-drinks')             return <PreWorkoutBookCover {...props} />;

@@ -27,7 +27,7 @@ function BookCover({ slug, coverImage, size = 'sm' }: { slug: string; coverImage
       />
     );
   }
-  if (slug === 'gym-energy-recipes')  return <GymEnergyBookCover size={size} />;
+  if (slug === 'gym-energy' || slug === 'gym-energy-recipes')  return <GymEnergyBookCover size={size} />;
   if (slug === 'fat-loss-smoothies')  return <FatLossSmoothiesBookCover size={size} />;
   if (slug === 'healing-drinks')      return <HealingDrinksBookCover size={size} />;
   if (slug === 'pre-workout-drinks')  return <PreWorkoutBookCover size={size} />;
