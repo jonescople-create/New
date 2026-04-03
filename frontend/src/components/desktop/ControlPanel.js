@@ -69,20 +69,19 @@ export default function ControlPanel({ onClose }) {
         </div>
       </div>
 
-      <div
+      <button
         style={{
           display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px',
-          borderRadius: 10, cursor: 'pointer', color: 'rgba(255,255,255,0.5)',
-          transition: 'all 0.15s ease', fontSize: 13
+          borderRadius: 10, cursor: 'pointer', color: '#FF6B8A',
+          fontSize: 13, background: 'rgba(255,0,55,0.08)', border: '1px solid rgba(255,0,55,0.15)',
+          width: '100%', fontFamily: 'Manrope, sans-serif', transition: 'all 0.15s ease'
         }}
         onClick={logout}
-        onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,0,55,0.1)'; e.currentTarget.style.color = '#FF6B8A'; }}
-        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; }}
         data-testid="control-logout"
       >
         <LogOut size={15} />
         <span>Sign Out</span>
-      </div>
+      </button>
     </div>
   );
 }
