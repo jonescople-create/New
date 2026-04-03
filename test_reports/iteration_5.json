@@ -1,0 +1,95 @@
+{
+  "summary": "Supabase migration testing iteration 5. All 32 backend API tests pass (100%). All key endpoints migrated from MongoDB to Supabase are working correctly. 1 known bug found: admin/sync-products always returns synced=0 due to missing 'id' field in the PRODUCTS list causing Supabase NOT NULL constraint violation. Frontend loads correctly - store page shows 15 products, game page at /fruit-game works with Supabase leaderboard showing real-time data from test submissions.",
+  "backend_issues": {
+    "critical": [
+      {
+        "endpoint": "POST /api/admin/sync-products",
+        "issue": "Returns synced=0 for all 13 products. Root cause: PRODUCTS list in server.py does not include 'id' field, Supabase products table has NOT NULL constraint on id column. Supabase error: 23502 null value in column id of relation products violates not-null constraint. upsert_product_catalog silently returns empty dict {} for all failures.",
+        "priority": "MEDIUM",
+        "rca": "The PRODUCTS list defined in sync_products_to_supabase() has no 'id' field. The Supabase products table has id as NOT NULL. upsert_product_catalog() fails with 409/400 and returns {} for all 13 products. Fix: Add UUIDs to each product in PRODUCTS list (import uuid; 'id': str(uuid.uuid4())) OR make id auto-generated in the Supabase schema."
+      }
+    ],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "Game route",
+        "issue": "/fruit-catcher returns 404. Correct route is /fruit-game",
+        "selector": "nav link to game",
+        "priority": "LOW - The correct URL /fruit-game works fine. Just not aliased."
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "Homepage console",
+        "issues": ["Multiple 400 errors in console (likely service worker cache issue or third-party resource load failures - does not impact UX)"]
+      }
+    ]
+  },
+  "passed_tests": [
+    "GET /api/products → 15 products from Supabase",
+    "GET /api/products/category/ebook → filters ebooks only",
+    "GET /api/products/category/recipe-pack → filters recipe packs",
+    "GET /api/products/caribbean-fruit-guide → returns single product with slug/price/title",
+    "GET /api/products/nonexistent-slug → 404 correctly",
+    "GET /api/game/leaderboard → returns list of entries",
+    "POST /api/game/leaderboard (with email) → score recorded, appears in leaderboard with derived player_name",
+    "POST /api/game/leaderboard (without email) → anonymous score recorded successfully",
+    "Leaderboard shows named players (derived from email) after Supabase VIEW update",
+    "POST /api/subscribe (new email) → {status:subscribed, discount_code:IFG20, discount_pct:20}",
+    "POST /api/subscribe (duplicate email) → {status:already_subscribed}",
+    "GET /api/subscribe/check/jonescople@gmail.com → subscribed=true",
+    "GET /api/subscribe/check/unknown@example.com → subscribed=false",
+    "POST /api/subscribe with invalid email → 400",
+    "POST /api/discount/validate IFG20 → valid:true, 20%",
+    "POST /api/discount/validate CHALLENGE25 → valid:true, 25%",
+    "POST /api/discount/validate FRUIT10 → valid:true, 10%",
+    "POST /api/discount/validate BADCODE99 → valid:false",
+    "POST /api/checkout/create-order with IFG20 → order_id from Supabase, 20% discount applied",
+    "POST /api/checkout/create-order without discount → full price, order_id from Supabase",
+    "POST /api/checkout/create-order missing email → 400",
+    "POST /api/checkout/create-order invalid product → 404",
+    "GET /api/game/daily-challenge → target_score, reward_code=CHALLENGE25, theme, expires_at",
+    "POST /api/game/daily-challenge/complete (score >= target) → completed=true, reward_code=CHALLENGE25",
+    "POST /api/game/daily-challenge/complete (score < target) → completed=false with remaining",
+    "POST /api/admin/login (correct credentials) → JWT access token",
+    "POST /api/admin/login (wrong password) → 401",
+    "Frontend homepage loads with correct navigation and hero section",
+    "Frontend store page loads with product categories (Ebooks active, others Coming Soon)",
+    "Frontend ebooks store page shows products from Supabase",
+    "Frontend /fruit-game page loads, shows daily challenge, leaderboard with Supabase data"
+  ],
+  "test_report_links": [
+    "/app/backend/tests/test_supabase_migration.py",
+    "/app/test_reports/pytest/pytest_results_iter5.xml"
+  ],
+  "action_items": [
+    "Fix sync-products: Add 'id' field (UUID) to each product in PRODUCTS list in server.py sync_products_to_supabase() function. Example: import uuid; add 'id': str(uuid.uuid4()) or use deterministic UUIDs based on slug.",
+    "Consider aliasing /fruit-catcher → /fruit-game route for backward compatibility (low priority)"
+  ],
+  "critical_code_review_comments": [
+    "CRITICAL BUG: sync_products_to_supabase() silently fails - synced=0 but API returns 200. No error raised. upsert_product_catalog() should log/raise when status is not 200/201. PRODUCTS list missing 'id' field.",
+    "upsert_product_catalog() uses Prefer: resolution=merge-duplicates but does not specify on_conflict=slug in URL. Should be 'products?on_conflict=slug' for proper upsert behavior.",
+    "server.py is 2207 lines - should be split into separate router files (admin.py, store.py, game.py, etc.) for maintainability.",
+    "test_credentials.md still references MongoDB collections which are no longer used - should be updated to Supabase table names."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_supabase_migration.py"
+  ],
+  "success_rate": {
+    "backend": "100% (32/32 tests pass, 1 known functional bug in sync-products)",
+    "frontend": "95% (all pages load, game works, leaderboard shows Supabase data)"
+  },
+  "seed_data_creation": "Created test subscribers: test_supabase_migration_{timestamp}@example.com, jonescople@gmail.com (now in email_captures). Game sessions: test_leaderboard_supabase@example.com (9999 pts), test_challenge_complete@example.com (873 pts). Checkout orders: test_checkout@example.com, test_checkout_nodiscount@example.com.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Supabase migration is complete and working. All key endpoints pass. The only bug is sync-products returning synced=0 due to missing 'id' field in PRODUCTS list. Products in Supabase already have 15 products (pre-seeded). The game route is /fruit-game (not /game or /fruit-catcher). Leaderboard uses a VIEW that groups game_sessions by email. Previous iterations 1-4 tested MongoDB (now removed). Backend test file: /app/backend/tests/test_supabase_migration.py with 32 tests.",
+  "rca_of_sync_products_bug": {
+    "endpoint": "POST /api/admin/sync-products",
+    "root_cause": "The PRODUCTS list in sync_products_to_supabase() (server.py line 2121-2135) does not include 'id' field. Supabase products table has 'id' column with NOT NULL constraint. When upsert_product_catalog() POSTs to Supabase, it fails with error code 23502 (null value in column id violates not-null constraint). The function returns {} for each failure, so synced counter stays at 0.",
+    "reproduction": "POST /api/admin/sync-products with valid admin JWT token → returns {synced:0, total:13, source:supabase}",
+    "mitigation": "Add 'id' field to each product in PRODUCTS list. Options: (1) Import uuid and add 'id': str(uuid.uuid4()) - but this creates new UUIDs on each call. (2) Use deterministic UUIDs based on slug using uuid.uuid5(). (3) Use the existing product IDs from Supabase by fetching them first. (4) Make id column auto-generated (serial/uuid default) in Supabase schema."
+  }
+}

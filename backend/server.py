@@ -799,41 +799,29 @@ def write_products_to_file(products: List[dict]):
         raise
 
 @app.get("/api/products")
-async def get_all_products():
-    """Get all store products (public endpoint) — MongoDB catalog first, then Supabase"""
+def get_all_products():
+    """Get all store products (public endpoint) — Supabase"""
     try:
-        # Try MongoDB catalog first (has all 13 synced products)
-        if mongo_db is not None:
-            docs = await mongo_db.products_catalog.find({}, {"_id": 0}).to_list(length=100)
-            if docs:
-                return docs
-        # Fallback to Supabase
-        products = read_products_from_file()
+        products = supabase_db.get_all_products()
         return products
     except Exception as e:
         logger.error(f"Error fetching products: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/products/category/{category}")
-async def get_products_by_category(category: str):
+def get_products_by_category(category: str):
     """Get products by category (public endpoint)"""
     try:
-        if mongo_db is not None:
-            docs = await mongo_db.products_catalog.find({"category": category}, {"_id": 0}).to_list(length=100)
-            if docs:
-                return docs
-        products = read_products_from_file()
-        filtered = [p for p in products if p.get("category") == category]
-        return filtered
+        return supabase_db.get_products_by_category(category)
     except Exception as e:
         logger.error(f"Error fetching products: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/products/{slug}")
-async def get_product_by_slug(slug: str):
-    """Get a single product by slug (public endpoint) — checks MongoDB catalog + Supabase"""
+def get_product_by_slug(slug: str):
+    """Get a single product by slug (public endpoint)"""
     try:
-        product = await get_product_by_slug_any(slug)
+        product = supabase_db.get_product_by_slug(slug)
         if not product:
             raise HTTPException(status_code=404, detail="Product not found")
         return product
@@ -1566,20 +1554,14 @@ async def get_ebook_by_slug(slug: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# ==================== Game Leaderboard API (MongoDB-backed) ====================
-
-from motor.motor_asyncio import AsyncIOMotorClient
-
-MONGO_URL = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
-DB_NAME = os.environ.get('DB_NAME', 'test_database')
-mongo_client = AsyncIOMotorClient(MONGO_URL)
-mongo_db = mongo_client[DB_NAME]
+# ==================== Game Leaderboard API (Supabase-backed) ====================
 
 class LeaderboardEntry(BaseModel):
     player_name: str
     score: int
     level: int = 1
     achievements: int = 0
+    email: Optional[str] = None
 
 class EmailSubscriber(BaseModel):
     email: str
@@ -1595,32 +1577,33 @@ class DailyChallengeResponse(BaseModel):
     theme: str
 
 @app.get("/api/game/leaderboard")
-async def get_leaderboard(limit: int = 20):
+def get_leaderboard(limit: int = 20):
     """Get top scores from the global leaderboard"""
     try:
-        cursor = mongo_db.game_leaderboard.find(
-            {}, {"_id": 0}
-        ).sort("score", -1).limit(limit)
-        entries = await cursor.to_list(length=limit)
+        entries = supabase_db.get_leaderboard(min(limit, 50))
         return entries
     except Exception as e:
         logger.error(f"Error getting leaderboard: {str(e)}")
         return []
 
 @app.post("/api/game/leaderboard")
-async def submit_score(entry: LeaderboardEntry):
+def submit_score(entry: LeaderboardEntry):
     """Submit a score to the global leaderboard"""
     try:
-        data = {
-            'player_name': entry.player_name[:20].strip(),
+        # Store in Supabase game_sessions (email optional)
+        supabase_db.insert_game_session(
+            email=entry.email,
+            score=entry.score,
+            level=entry.level,
+            xp=entry.achievements,
+        )
+        return {
+            'player_name': entry.player_name,
             'score': max(0, min(entry.score, 99999)),
             'level': max(1, min(entry.level, 99)),
             'achievements': max(0, min(entry.achievements, 50)),
             'created_at': datetime.utcnow().isoformat(),
         }
-        await mongo_db.game_leaderboard.insert_one(data)
-        data.pop('_id', None)
-        return data
     except Exception as e:
         logger.error(f"Error submitting score: {str(e)}")
         return {"status": "error", "message": str(e)}
@@ -1634,15 +1617,15 @@ DISCOUNT_CODES = {
 }
 
 @app.post("/api/subscribe")
-async def subscribe_email(subscriber: EmailSubscriber):
+def subscribe_email(subscriber: EmailSubscriber):
     """Subscribe email, send discount code IFG20 + track"""
     try:
         email = subscriber.email.strip().lower()
         if not email or '@' not in email:
             raise HTTPException(status_code=400, detail="Invalid email")
-        
-        # Check if already subscribed
-        existing = await mongo_db.email_subscribers.find_one({"email": email})
+
+        # Check if already captured in Supabase
+        existing = supabase_db.check_email_capture(email)
         if existing:
             return {
                 "status": "already_subscribed",
@@ -1651,27 +1634,20 @@ async def subscribe_email(subscriber: EmailSubscriber):
                 "discount_pct": 20,
                 "message": "You're already subscribed! Your code IFG20 is still valid."
             }
-        
-        data = {
-            'email': email,
-            'source': subscriber.source,
-            'interest': subscriber.interest,
-            'discount_code': 'IFG20',
-            'subscribed_at': datetime.utcnow().isoformat(),
-            'discount_used': False,
-        }
-        await mongo_db.email_subscribers.insert_one(data)
-        data.pop('_id', None)
-        
+
+        # Insert into email_captures
+        supabase_db.add_email_capture(email, source=subscriber.source)
+
         logger.info(f"New subscriber: {email} from {subscriber.source}")
-        
+
         # Send welcome email with IFG20 code via Resend (async, non-blocking)
         try:
             import asyncio
-            await asyncio.to_thread(_send_welcome_email, email)
+            import threading
+            threading.Thread(target=_send_welcome_email, args=(email,), daemon=True).start()
         except Exception as email_err:
             logger.warning(f"Email send failed (non-blocking): {email_err}")
-        
+
         return {
             "status": "subscribed",
             "email": email,
@@ -1686,11 +1662,11 @@ async def subscribe_email(subscriber: EmailSubscriber):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/subscribe/check/{email}")
-async def check_subscriber(email: str):
+def check_subscriber(email: str):
     """Check if email is subscribed and return their discount"""
     try:
         email = email.strip().lower()
-        existing = await mongo_db.email_subscribers.find_one({"email": email}, {"_id": 0})
+        existing = supabase_db.check_email_capture(email)
         if existing:
             return {"subscribed": True, "discount_code": "IFG20", "discount_pct": 20, **existing}
         return {"subscribed": False}
@@ -1758,21 +1734,20 @@ async def daily_challenge():
 async def complete_daily_challenge(request: Request):
     """Mark daily challenge as complete and issue reward"""
     try:
-        body = await request.json()
-        score = body.get('score', 0)
-        player_name = body.get('player_name', 'Anonymous')
-        
+        request_data = await request.json()
+        score = request_data.get('score', 0)
+        player_name = request_data.get('player_name', 'Anonymous')
+        email = request_data.get('email')
+
         challenge = get_daily_challenge()
         if score >= challenge['target_score']:
-            # Record completion
-            await mongo_db.challenge_completions.insert_one({
-                'player_name': player_name[:20],
-                'score': score,
-                'target': challenge['target_score'],
-                'date': challenge['date'],
-                'completed_at': datetime.utcnow().isoformat(),
-            })
-            
+            # Record in Supabase game_sessions
+            supabase_db.insert_game_session(
+                email=email,
+                score=score,
+                level=challenge.get('target_score', 100) // 50,
+                xp=score,
+            )
             return {
                 "completed": True,
                 "reward_code": "CHALLENGE25",
@@ -1792,14 +1767,11 @@ async def complete_daily_challenge(request: Request):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/game/daily-challenge/leaderboard")
-async def daily_challenge_leaderboard():
-    """Get today's challenge completions"""
+def daily_challenge_leaderboard():
+    """Get today's top challenge completions"""
     try:
         today = datetime.utcnow().strftime('%Y-%m-%d')
-        cursor = mongo_db.challenge_completions.find(
-            {"date": today}, {"_id": 0}
-        ).sort("score", -1).limit(10)
-        entries = await cursor.to_list(length=10)
+        entries = supabase_db.get_daily_challenge_leaderboard(today)
         return entries
     except Exception as e:
         logger.error(f"Error getting challenge leaderboard: {str(e)}")
@@ -2145,7 +2117,7 @@ def _send_welcome_email(to_email: str):
 
 @app.post("/api/admin/sync-products")
 async def sync_products_to_supabase(payload: dict = Depends(verify_token)):
-    """Sync all frontend products to MongoDB (accessible by all APIs)"""
+    """Sync all frontend products to Supabase products table"""
     PRODUCTS = [
         {"slug": "tropical-juice-smoothie-recipes", "title": "Tropical Juice & Smoothie Recipes", "price": 9.99, "original_price": 14.99, "category": "recipe-pack", "short_description": "50 Caribbean-inspired smoothie and juice recipes with nutrition breakdowns.", "cover_image": "https://images.unsplash.com/photo-1622597467836-f3285f2131b8?w=400", "is_featured": False},
         {"slug": "caribbean-fruit-guide", "title": "Caribbean Fruit Encyclopedia", "price": 14.99, "original_price": 24.99, "category": "ebook", "short_description": "The complete guide to 100+ Caribbean fruits — history, nutrition, and growing tips.", "cover_image": "https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=400", "is_featured": True},
@@ -2161,87 +2133,60 @@ async def sync_products_to_supabase(payload: dict = Depends(verify_token)):
         {"slug": "gym-energy", "title": "Tropical Gym Energy Recipes", "price": 14.99, "original_price": 22.99, "category": "recipe-pack", "short_description": "50+ gym-focused energy recipes using tropical fruits.", "cover_image": "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400", "is_featured": True},
         {"slug": "smoothie-recipes", "title": "Island Smoothie Collection", "price": 8.99, "original_price": 13.99, "category": "recipe-pack", "short_description": "30 island-inspired smoothie recipes for every occasion.", "cover_image": "https://images.unsplash.com/photo-1505252585461-04db1eb84625?w=400", "is_featured": False},
     ]
-    
+
     synced = 0
     for prod in PRODUCTS:
-        prod['synced_at'] = datetime.utcnow().isoformat()
-        await mongo_db.products_catalog.update_one(
-            {"slug": prod['slug']},
-            {"$set": prod},
-            upsert=True
-        )
-        synced += 1
-    
-    return {"synced": synced, "total": len(PRODUCTS), "source": "mongodb"}
+        result = supabase_db.upsert_product_catalog(prod)
+        if result:
+            synced += 1
+
+    return {"synced": synced, "total": len(PRODUCTS), "source": "supabase"}
 
 
-# Product lookup helper — checks MongoDB catalog then Supabase
-async def get_product_by_slug_any(slug: str):
-    """Get product from MongoDB catalog (full 13) or Supabase (legacy 4)"""
-    # Try MongoDB first (has all 13)
-    doc = await mongo_db.products_catalog.find_one({"slug": slug}, {"_id": 0})
-    if doc:
-        return doc
-    # Partial match in MongoDB
-    doc = await mongo_db.products_catalog.find_one(
-        {"slug": {"$regex": f"^{slug[:6]}"}},
-        {"_id": 0}
-    )
-    if doc:
-        return doc
-    # Fall back to Supabase
-    try:
-        products = read_products_from_file()
-        p = next((p for p in products if p.get("slug") == slug or slug.startswith(p.get("slug", "")) or p.get("slug", "").startswith(slug)), None)
-        return p
-    except:
-        return None
+# Product lookup helper — Supabase only
+def get_product_helper(slug: str):
+    """Get product from Supabase by slug"""
+    return supabase_db.get_product_by_slug(slug)
 
 
 # ==================== Discount-aware PayPal ====================
 
 @app.post("/api/checkout/create-order")
 async def create_discounted_order(request: Request):
-    """Create a PayPal order with optional discount code"""
+    """Create a PayPal order with optional discount code — recorded in Supabase"""
     try:
         body = await request.json()
         product_slug = body.get('productSlug', '')
         email = body.get('email', '')
         discount_code = body.get('discountCode', '').strip().upper()
-        
+
         if not product_slug or not email:
             raise HTTPException(status_code=400, detail="productSlug and email required")
-        
-        # Get product price
-        product = await get_product_by_slug_any(product_slug)
+
+        # Get product price from Supabase
+        product = supabase_db.get_product_by_slug(product_slug)
         if not product:
             raise HTTPException(status_code=404, detail="Product not found")
         original_price = float(product['price'])
-        
+
         # Apply discount if valid
         discount_pct = 0
         if discount_code and discount_code in DISCOUNT_CODES and DISCOUNT_CODES[discount_code]['active']:
             discount_pct = DISCOUNT_CODES[discount_code]['discount_pct']
-        
+
         final_price = round(original_price * (1 - discount_pct / 100), 2)
-        
-        # Record the order intent
-        order_data = {
-            'email': email.lower(),
-            'product_slug': product_slug,
-            'product_title': product['title'],
-            'original_price': original_price,
-            'discount_code': discount_code or None,
-            'discount_pct': discount_pct,
-            'final_price': final_price,
-            'status': 'pending',
-            'created_at': datetime.utcnow().isoformat(),
-        }
-        result = await mongo_db.orders.insert_one(order_data)
-        order_id = str(result.inserted_id)
-        
+
+        # Record the purchase in Supabase
+        purchase = supabase_db.create_purchase(
+            email=email,
+            product_slug=product_slug,
+            amount=final_price,
+            status='pending',
+        )
+        order_id = purchase.get('id', 'unknown')
+
         return {
-            "order_id": order_id,
+            "order_id": str(order_id),
             "product": product['title'],
             "original_price": original_price,
             "discount_code": discount_code or None,

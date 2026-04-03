@@ -246,6 +246,110 @@ class SupabaseClient:
         response = self._request('GET', f'fruit_products?fruit_id=eq.{fruit_id}&select=*,products(*)')
         return response.json() if response.status_code == 200 else []
 
+    # ─── GAME SESSIONS / LEADERBOARD ──────────────────────────────────────────
+
+    def insert_game_session(self, email: Optional[str], score: int, level: int, xp: int) -> Dict:
+        """Insert a single game session (score submission)"""
+        data: Dict[str, Any] = {'score': max(0, min(score, 99999)), 'level': max(1, min(level, 99)), 'xp': max(0, xp)}
+        if email:
+            data['email'] = email.strip().lower()
+        response = self._request('POST', 'game_sessions', prefer='return=representation', json=data)
+        return response.json()[0] if response.status_code == 201 else {}
+
+    def get_leaderboard(self, limit: int = 20) -> List[Dict]:
+        """Read top scores from the leaderboard VIEW, transformed for frontend"""
+        response = self._request('GET', f'leaderboard?order=best_score.desc&limit={limit}')
+        if response.status_code == 200:
+            entries = response.json()
+            result = []
+            for i, e in enumerate(entries):
+                email_val = e.get('email', '') or ''
+                if '@' in email_val:
+                    player_name = email_val.split('@')[0].replace('.', ' ').title()
+                else:
+                    player_name = f"Player {i + 1}"
+                result.append({
+                    'player_name': player_name,
+                    'score': e.get('best_score', 0),
+                    'level': e.get('best_level', 1),
+                    'achievements': e.get('total_xp', 0),
+                    'games_played': e.get('games_played', 1),
+                })
+            return result
+        return []
+
+    def get_daily_challenge_leaderboard(self, date_str: str, limit: int = 10) -> List[Dict]:
+        """Get top game sessions for a specific date"""
+        response = self._request('GET', f'game_sessions?played_at=gte.{date_str}T00:00:00&played_at=lt.{date_str}T23:59:59&order=score.desc&limit={limit}')
+        if response.status_code == 200:
+            entries = response.json()
+            result = []
+            for i, e in enumerate(entries):
+                email_val = e.get('email', '') or ''
+                player_name = email_val.split('@')[0].title() if '@' in email_val else f"Player {i + 1}"
+                result.append({
+                    'player_name': player_name,
+                    'score': e.get('score', 0),
+                    'level': e.get('level', 1),
+                    'date': date_str,
+                })
+            return result
+        return []
+
+    # ─── EMAIL CAPTURES ────────────────────────────────────────────────────────
+
+    def check_email_capture(self, email: str) -> Optional[Dict]:
+        """Check if email is already captured"""
+        response = self._request('GET', f'email_captures?email=eq.{email}&limit=1')
+        data = response.json() if response.status_code == 200 else []
+        return data[0] if data else None
+
+    def add_email_capture(self, email: str, source: str = 'game', product_slug: str = None) -> Dict:
+        """Insert a new email capture record"""
+        from datetime import datetime, timezone
+        data: Dict[str, Any] = {
+            'email': email.strip().lower(),
+            'source': source,
+            'captured_at': datetime.now(timezone.utc).isoformat(),
+            'unsubscribed': False,
+        }
+        if product_slug:
+            data['product_slug'] = product_slug
+        response = self._request('POST', 'email_captures', prefer='return=representation', json=data)
+        return response.json()[0] if response.status_code == 201 else {}
+
+    # ─── PURCHASES (CHECKOUT ORDERS) ──────────────────────────────────────────
+
+    def create_purchase(self, email: str, product_slug: str, amount: float,
+                        paypal_order_id: str = None, status: str = 'pending') -> Dict:
+        """Record a checkout order in the purchases table"""
+        data: Dict[str, Any] = {
+            'email': email.strip().lower(),
+            'product_slug': product_slug,
+            'amount': amount,
+            'status': status,
+        }
+        if paypal_order_id:
+            data['paypal_order_id'] = paypal_order_id
+        response = self._request('POST', 'purchases', prefer='return=representation', json=data)
+        return response.json()[0] if response.status_code == 201 else {}
+
+    # ─── PRODUCT CATALOG UPSERT ────────────────────────────────────────────────
+
+    def upsert_product_catalog(self, product: Dict) -> Dict:
+        """Upsert a product by slug (merge on conflict)"""
+        response = self._request(
+            'POST', 'products',
+            prefer='return=representation,resolution=merge-duplicates',
+            json=product
+        )
+        return response.json()[0] if response.status_code in [200, 201] else {}
+
+    def get_products_by_category(self, category: str) -> List[Dict]:
+        """Get products filtered by category"""
+        response = self._request('GET', f'products?category=eq.{category}&order=title.asc')
+        return response.json() if response.status_code == 200 else []
+
 
 # Global client instance
 db = SupabaseClient()

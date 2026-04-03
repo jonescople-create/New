@@ -3,7 +3,6 @@ const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const { MongoClient, ObjectId } = require('mongodb');
 const { createClient } = require('@supabase/supabase-js');
 const { Resend } = require('resend');
 const rateLimit = require('express-rate-limit');
@@ -16,8 +15,6 @@ const PORT = process.env.PORT || 3000;
 // ── Config ─────────────────────────────────────────────────────────────────────
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
-const MONGO_URL = process.env.MONGO_URL || process.env.MONGODB_URI || 'mongodb://localhost:27017';
-const DB_NAME = process.env.DB_NAME || 'islandfruitguide';
 const JWT_SECRET = process.env.JWT_SECRET || 'islandfruitguide-super-secret-key-2024-v2';
 const JWT_EXPIRY = process.env.JWT_EXPIRATION_HOURS || '24';
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'jonescople@gmail.com';
@@ -29,19 +26,6 @@ const FRONTEND_URL = process.env.FRONTEND_URL || '';
 // ── Supabase ───────────────────────────────────────────────────────────────────
 const supabase = (SUPABASE_URL && SUPABASE_KEY)
   ? createClient(SUPABASE_URL, SUPABASE_KEY) : null;
-
-// ── MongoDB ────────────────────────────────────────────────────────────────────
-let db;
-const mongo = new MongoClient(MONGO_URL);
-async function connectMongo() {
-  try {
-    await mongo.connect();
-    db = mongo.db(DB_NAME);
-    console.log('MongoDB connected');
-  } catch (e) {
-    console.warn('MongoDB not available:', e.message);
-  }
-}
 
 // ── Resend ─────────────────────────────────────────────────────────────────────
 const resend = RESEND_KEY ? new Resend(RESEND_KEY) : null;
@@ -81,12 +65,27 @@ async function supaSelect(table, query = {}) {
   } catch (e) { console.error(`Supabase ${table}:`, e.message); return []; }
 }
 
-// ── Product lookup (MongoDB catalog → Supabase fallback) ────────────────────────
+async function supaInsert(table, data) {
+  if (!supabase) return null;
+  try {
+    const { data: result, error } = await supabase.from(table).insert(data).select().single();
+    if (error) { console.error(`Supabase insert ${table}:`, error.message); return null; }
+    return result;
+  } catch (e) { console.error(`Supabase insert ${table}:`, e.message); return null; }
+}
+
+async function supaUpsert(table, data, onConflict) {
+  if (!supabase) return null;
+  try {
+    const opts = onConflict ? { onConflict } : {};
+    const { data: result, error } = await supabase.from(table).upsert(data, opts).select().single();
+    if (error) { console.error(`Supabase upsert ${table}:`, error.message); return null; }
+    return result;
+  } catch (e) { console.error(`Supabase upsert ${table}:`, e.message); return null; }
+}
+
+// ── Product lookup ────────────────────────────────────────────────────────────
 async function findProduct(slug) {
-  if (db) {
-    const doc = await db.collection('products_catalog').findOne({ slug }, { projection: { _id: 0 } });
-    if (doc) return doc;
-  }
   const rows = await supaSelect('products', { eq: { slug }, limit: 1 });
   return rows[0] || null;
 }
@@ -108,24 +107,13 @@ app.get('/api/health', (_, res) => res.json({ status: 'ok', timestamp: new Date(
 // ── Products ────────────────────────────────────────────────────────────────────
 app.get('/api/products', async (_, res) => {
   try {
-    // Try MongoDB first (full catalog), then Supabase
-    if (db) {
-      const docs = await db.collection('products_catalog').find({}, { projection: { _id: 0 } }).toArray();
-      if (docs.length) return res.json(docs);
-    }
-    const data = await supaSelect('products');
+    const data = await supaSelect('products', { order: { col: 'title', asc: true } });
     res.json(data);
   } catch (e) { res.status(500).json({ detail: e.message }); }
 });
 
 app.get('/api/products/category/:category', async (req, res) => {
   try {
-    if (db) {
-      const docs = await db.collection('products_catalog').find(
-        { category: req.params.category }, { projection: { _id: 0 } }
-      ).toArray();
-      if (docs.length) return res.json(docs);
-    }
     const data = await supaSelect('products', { eq: { category: req.params.category } });
     res.json(data);
   } catch (e) { res.status(500).json({ detail: e.message }); }
@@ -190,29 +178,37 @@ app.get('/api/config', (_, res) => res.json({ paypal_mode: process.env.PAYPAL_MO
 // ── Leaderboard ─────────────────────────────────────────────────────────────────
 app.get('/api/game/leaderboard', async (req, res) => {
   try {
-    if (!db) return res.json([]);
+    if (!supabase) return res.json([]);
     const limit = Math.min(parseInt(req.query.limit) || 20, 50);
-    const entries = await db.collection('game_leaderboard')
-      .find({}, { projection: { _id: 0 } })
-      .sort({ score: -1 }).limit(limit).toArray();
+    const { data, error } = await supabase.from('leaderboard')
+      .select('*').order('best_score', { ascending: false }).limit(limit);
+    if (error || !data) return res.json([]);
+    const entries = data.map((e, i) => {
+      const emailVal = e.email || '';
+      const playerName = emailVal.includes('@')
+        ? emailVal.split('@')[0].replace(/\./g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+        : `Player ${i + 1}`;
+      return { player_name: playerName, score: e.best_score, level: e.best_level, achievements: e.total_xp, games_played: e.games_played };
+    });
     res.json(entries);
   } catch (e) { res.json([]); }
 });
 
 app.post('/api/game/leaderboard', async (req, res) => {
   try {
-    if (!db) return res.json({ status: 'no_db' });
-    const { player_name, score, level, achievements } = req.body;
-    const data = {
-      player_name: String(player_name || 'Anonymous').slice(0, 20),
+    const { player_name, score, level, achievements, email } = req.body;
+    const sessionData = {
       score: Math.max(0, Math.min(Number(score) || 0, 99999)),
       level: Math.max(1, Math.min(Number(level) || 1, 99)),
-      achievements: Math.max(0, Math.min(Number(achievements) || 0, 50)),
-      created_at: new Date().toISOString(),
+      xp: Math.max(0, Number(achievements) || 0),
     };
-    await db.collection('game_leaderboard').insertOne(data);
-    delete data._id;
-    res.json(data);
+    if (email && email.includes('@')) sessionData.email = email.trim().toLowerCase();
+    if (supabase) await supabase.from('game_sessions').insert(sessionData);
+    res.json({
+      player_name: String(player_name || 'Anonymous').slice(0, 20),
+      score: sessionData.score, level: sessionData.level, achievements: sessionData.xp,
+      created_at: new Date().toISOString(),
+    });
   } catch (e) { res.status(500).json({ detail: e.message }); }
 });
 
@@ -249,15 +245,13 @@ app.get('/api/game/daily-challenge', (_, res) => res.json(getDailyChallenge()));
 
 app.post('/api/game/daily-challenge/complete', async (req, res) => {
   try {
-    const { score, player_name } = req.body;
+    const { score, player_name, email } = req.body;
     const challenge = getDailyChallenge();
     if (score >= challenge.target_score) {
-      if (db) {
-        await db.collection('challenge_completions').insertOne({
-          player_name: String(player_name || 'Anonymous').slice(0, 20),
-          score, target: challenge.target_score,
-          date: challenge.date, completed_at: new Date().toISOString(),
-        });
+      if (supabase) {
+        const sessionData = { score, level: Math.ceil(challenge.target_score / 50), xp: score };
+        if (email && email.includes('@')) sessionData.email = email.trim().toLowerCase();
+        await supabase.from('game_sessions').insert(sessionData);
       }
       res.json({ completed: true, reward_code: 'CHALLENGE25', reward_description: '25% off any ebook!',
         message: `You crushed it with ${score} pts! Use code CHALLENGE25 at checkout for 25% off.` });
@@ -270,11 +264,17 @@ app.post('/api/game/daily-challenge/complete', async (req, res) => {
 
 app.get('/api/game/daily-challenge/leaderboard', async (req, res) => {
   try {
-    if (!db) return res.json([]);
+    if (!supabase) return res.json([]);
     const today = new Date().toISOString().split('T')[0];
-    const entries = await db.collection('challenge_completions')
-      .find({ date: today }, { projection: { _id: 0 } })
-      .sort({ score: -1 }).limit(10).toArray();
+    const { data, error } = await supabase.from('game_sessions')
+      .select('*').gte('played_at', `${today}T00:00:00`).lte('played_at', `${today}T23:59:59`)
+      .order('score', { ascending: false }).limit(10);
+    if (error || !data) return res.json([]);
+    const entries = data.map((e, i) => {
+      const emailVal = e.email || '';
+      const playerName = emailVal.includes('@') ? emailVal.split('@')[0].replace(/\b\w/g, c => c.toUpperCase()) : `Player ${i + 1}`;
+      return { player_name: playerName, score: e.score, level: e.level, date: today };
+    });
     res.json(entries);
   } catch (e) { res.json([]); }
 });
@@ -288,15 +288,15 @@ app.post('/api/subscribe', async (req, res) => {
     const email = String(req.body.email || '').trim().toLowerCase();
     if (!email || !email.includes('@')) return res.status(400).json({ detail: 'Invalid email' });
 
-    if (db) {
-      const existing = await db.collection('email_subscribers').findOne({ email });
+    if (supabase) {
+      const { data: existing } = await supabase.from('email_captures').select('email').eq('email', email).single();
       if (existing) return res.json({
         status: 'already_subscribed', email, discount_code: 'IFG20', discount_pct: 20,
         message: "You're already subscribed! Your code IFG20 is still valid." });
 
-      await db.collection('email_subscribers').insertOne({
-        email, source: req.body.source || 'game', interest: req.body.interest || 'general',
-        discount_code: 'IFG20', subscribed_at: new Date().toISOString(), discount_used: false,
+      await supabase.from('email_captures').insert({
+        email, source: req.body.source || 'game',
+        captured_at: new Date().toISOString(), unsubscribed: false,
       });
     }
 
@@ -317,9 +317,9 @@ app.post('/api/subscribe', async (req, res) => {
 app.get('/api/subscribe/check/:email', async (req, res) => {
   try {
     const email = req.params.email.trim().toLowerCase();
-    if (db) {
-      const doc = await db.collection('email_subscribers').findOne({ email }, { projection: { _id: 0 } });
-      if (doc) return res.json({ subscribed: true, discount_code: 'IFG20', discount_pct: 20, ...doc });
+    if (supabase) {
+      const { data } = await supabase.from('email_captures').select('*').eq('email', email).single();
+      if (data) return res.json({ subscribed: true, discount_code: 'IFG20', discount_pct: 20, ...data });
     }
     res.json({ subscribed: false });
   } catch { res.json({ subscribed: false }); }
@@ -350,13 +350,12 @@ app.post('/api/checkout/create-order', async (req, res) => {
     const final_price = Math.round(original_price * (1 - discount_pct / 100) * 100) / 100;
 
     let order_id = crypto.randomUUID();
-    if (db) {
-      const result = await db.collection('orders').insertOne({
-        email: email.toLowerCase(), product_slug: productSlug, product_title: product.title,
-        original_price, discount_code: code || null, discount_pct, final_price,
-        status: 'pending', created_at: new Date().toISOString(),
-      });
-      order_id = result.insertedId.toString();
+    if (supabase) {
+      const { data } = await supabase.from('purchases').insert({
+        email: email.toLowerCase(), product_slug: productSlug,
+        amount: final_price, status: 'pending',
+      }).select().single();
+      if (data) order_id = data.id;
     }
 
     res.json({ order_id, product: product.title, original_price, discount_code: code || null,
@@ -383,7 +382,7 @@ app.post('/api/admin/login', async (req, res) => {
 });
 
 app.post('/api/admin/sync-products', verifyToken, async (req, res) => {
-  if (!db) return res.status(500).json({ detail: 'MongoDB not available' });
+  if (!supabase) return res.status(500).json({ detail: 'Supabase not configured' });
   const PRODUCTS = [
     { slug: 'tropical-juice-smoothie-recipes', title: 'Tropical Juice & Smoothie Recipes', price: 9.99, original_price: 14.99, category: 'recipe-pack', short_description: '50 Caribbean-inspired smoothie and juice recipes.', cover_image: 'https://images.unsplash.com/photo-1622597467836-f3285f2131b8?w=400', is_featured: false },
     { slug: 'caribbean-fruit-guide', title: 'Caribbean Fruit Encyclopedia', price: 14.99, original_price: 24.99, category: 'ebook', short_description: 'Complete guide to 100+ Caribbean fruits.', cover_image: 'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=400', is_featured: true },
@@ -401,29 +400,24 @@ app.post('/api/admin/sync-products', verifyToken, async (req, res) => {
   ];
   let synced = 0;
   for (const p of PRODUCTS) {
-    p.synced_at = new Date().toISOString();
-    await db.collection('products_catalog').updateOne({ slug: p.slug }, { $set: p }, { upsert: true });
-    synced++;
+    const { error } = await supabase.from('products').upsert(p, { onConflict: 'slug' });
+    if (!error) synced++;
   }
-  res.json({ synced, total: PRODUCTS.length, source: 'mongodb' });
+  res.json({ synced, total: PRODUCTS.length, source: 'supabase' });
 });
 
 // ── Admin CRUD ──────────────────────────────────────────────────────────────────
 app.get('/api/admin/subscribers', verifyToken, async (req, res) => {
   try {
-    if (!db) return res.json([]);
-    const docs = await db.collection('email_subscribers').find({}, { projection: { _id: 0 } })
-      .sort({ subscribed_at: -1 }).limit(100).toArray();
-    res.json(docs);
+    const rows = await supaSelect('email_captures', { order: { col: 'captured_at', asc: false }, limit: 100 });
+    res.json(rows);
   } catch { res.json([]); }
 });
 
 app.get('/api/admin/orders', verifyToken, async (req, res) => {
   try {
-    if (!db) return res.json([]);
-    const docs = await db.collection('orders').find({}, { projection: { _id: 0 } })
-      .sort({ created_at: -1 }).limit(100).toArray();
-    res.json(docs);
+    const rows = await supaSelect('purchases', { order: { col: 'created_at', asc: false }, limit: 100 });
+    res.json(rows);
   } catch { res.json([]); }
 });
 
@@ -463,9 +457,8 @@ app.get('*', (req, res) => {
 
 // ── Start ───────────────────────────────────────────────────────────────────────
 async function start() {
-  await connectMongo();
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`IslandFruitGuide backend running on port ${PORT}`);
+    console.log(`IslandFruitGuide backend running on port ${PORT} (Supabase-only)`);
   });
 }
 start();
