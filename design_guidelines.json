@@ -1,0 +1,96 @@
+{
+  "theme": "Dark",
+  "archetype": "7 (Electric & Neon) combined with Obsidian Glass",
+  "colors": {
+    "background": "#000000",
+    "surface": "rgba(0, 0, 0, 0.6)",
+    "surface_blur": "backdrop-blur-2xl",
+    "primary_glow": "#9D4CDD",
+    "secondary_glow": "#1B93A4",
+    "accent_palette": ["#FF0055", "#00FF66", "#00C3FF", "#8A2BE2"],
+    "text_primary": "#FFFFFF",
+    "text_secondary": "rgba(255, 255, 255, 0.7)",
+    "border_iridescent": "linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.4) 100%)",
+    "border_subtle": "rgba(255, 255, 255, 0.1)"
+  },
+  "typography": {
+    "heading_font": "Outfit",
+    "body_font": "Manrope",
+    "scale": {
+      "h1": "text-4xl sm:text-5xl lg:text-6xl tracking-tighter font-medium",
+      "h2": "text-2xl sm:text-3xl lg:text-4xl tracking-tight font-medium",
+      "h3": "text-xl sm:text-2xl tracking-tight font-medium",
+      "body": "text-base leading-relaxed text-white/80",
+      "label": "text-xs tracking-[0.2em] uppercase text-white/60"
+    }
+  },
+  "spacing": {
+    "padding": "p-6 sm:p-8",
+    "gap": "gap-6 sm:gap-8",
+    "window_gap": "gap-4"
+  },
+  "layout": {
+    "shell": "h-screen w-screen overflow-hidden relative text-white",
+    "window": "absolute bg-black/60 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl flex flex-col overflow-hidden",
+    "dock": "absolute bottom-6 left-1/2 -translate-x-1/2 px-6 py-4 bg-black/40 backdrop-blur-xl border border-white/10 rounded-3xl flex items-center gap-4",
+    "top_bar": "absolute top-0 left-0 w-full h-10 px-6 bg-black/30 backdrop-blur-md border-b border-white/5 flex items-center justify-between text-sm"
+  },
+  "surfaces": {
+    "obsidian_glass": {
+      "bg": "bg-black/60",
+      "blur": "backdrop-blur-2xl",
+      "border": "border border-white/10",
+      "shadow": "shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
+    },
+    "iridescent_glass": {
+      "bg": "bg-black/40",
+      "blur": "backdrop-blur-3xl",
+      "border": "border border-transparent bg-gradient-to-br from-white/20 via-white/5 to-white/20 bg-clip-border",
+      "shadow": "shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
+    }
+  },
+  "motion": {
+    "window_drag": "framer-motion drag elastic momentum",
+    "aura_pulse": "CSS keyframes or Three.js soft glow behind window, pulsing on CPU load",
+    "dock_expand": "framer-motion layout transitions for bottom-left dashboard expansion",
+    "hover": "transition-all duration-300 ease-out"
+  },
+  "components": {
+    "Dock": "Custom framer-motion container with scaling icons on hover",
+    "Window": "Draggable framer-motion div with Resize capabilities, title bar, close/minimize/maximize buttons",
+    "Settings App": "Glassmorphism panel with left sidebar navigation, right panel with Aura Effects controls including intensity slider, color shift mode dropdown, accent palette color dots, interface transparency slider, toggles",
+    "Desktop Background": "Three.js or pure CSS fluid cosmic background with auto-extract dominant colors for Aura",
+    "System Tray": "Top right corner, icons for WiFi, Bluetooth, Volume, Battery, Time"
+  },
+  "media": {
+    "wallpapers": [
+      {
+        "url": "https://images.unsplash.com/photo-1680486481682-6828194ec366?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1Nzl8MHwxfHNlYXJjaHw0fHxjb3NtaWMlMjBkZWVwJTIwc3BhY2UlMjBuZWJ1bGElMjB3YWxscGFwZXJ8ZW58MHx8fHwxNzc1MTg4MjY2fDA&ixlib=rb-4.1.0&q=85",
+        "description": "Deep space cosmic wallpaper with stars"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1768936918008-4661573f8c78?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NzV8MHwxfHNlYXJjaHwzfHxhYnN0cmFjdCUyMGdsb3dpbmclMjBjb2xvcmZ1bCUyMGZsdWlkJTIwYmFja2dyb3VuZHxlbnwwfHx8fDE3NzUxODgyNjZ8MA&ixlib=rb-4.1.0&q=85",
+        "description": "Abstract fluid vibrant wallpaper for aura extraction"
+      }
+    ],
+    "logos": [
+      {
+        "url": "https://customer-assets.emergentagent.com/job_glow-workspace/artifacts/2wqrcvq7_AURA%20LOGO.png",
+        "description": "AuraOS Colorful Swirl Ring Logo"
+      }
+    ]
+  },
+  "icons": "lucide-react for system icons, apps, and window controls",
+  "instructions_to_main_agent": [
+    "Scaffold the monorepo with React, Vite, Tailwind CSS, Framer Motion, and Three.js/PixiJS for Aura effects.",
+    "Implement a Compositor (Window Manager) managing state: Launch, Focus, Suspend, Kill.",
+    "Windows must be translucent (0.8 opacity) with high-density blur (backdrop-blur-2xl) - 'Obsidian Glass' aesthetic.",
+    "Implement an 'Aura' effect behind active windows: a glowing drop-shadow or Canvas-rendered glow that pulses.",
+    "Build the Dock at the bottom. When cursor hits bottom-left corner, expand it into a full-screen dashboard.",
+    "Settings App must include Aura Effects controls: intensity slider, color shift mode, accent dots, transparency.",
+    "Include hot corner detection for the dashboard.",
+    "Follow 'Obsidian Glass' design exactly. Do not use generic solid colors for backgrounds.",
+    "Every window must have rounded corners (rounded-2xl) and a subtle 1px border (border-white/10).",
+    "All interactive elements MUST include a data-testid attribute."
+  ]
+}
