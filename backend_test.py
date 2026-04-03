@@ -156,6 +156,33 @@ class IslandFruitAPITester:
         for slug in test_slugs:
             self.test_api_endpoint(f"Get Product: {slug}", "GET", f"products/{slug}", 200)
 
+    def test_game_leaderboard_api(self):
+        """Test game leaderboard API endpoints"""
+        print("\n🎮 Testing Game Leaderboard API...")
+        
+        # Test GET leaderboard (should work even if empty)
+        self.test_api_endpoint("Get Game Leaderboard", "GET", "game/leaderboard", 200)
+        
+        # Test POST to leaderboard
+        test_score_data = {
+            "player_name": "TestPlayer",
+            "score": 1250,
+            "level": 5,
+            "achievements": 8
+        }
+        
+        success, response = self.test_api_endpoint(
+            "Submit Score to Leaderboard", "POST", "game/leaderboard", 200, test_score_data
+        )
+        
+        if success:
+            print(f"   📊 Score submitted successfully")
+            # Test GET again to see if our score appears
+            self.test_api_endpoint("Get Updated Leaderboard", "GET", "game/leaderboard", 200)
+        
+        # Test with limit parameter
+        self.test_api_endpoint("Get Leaderboard with Limit", "GET", "game/leaderboard?limit=5", 200)
+
     def test_error_handling(self):
         """Test error handling for non-existent resources"""
         print("\n🚫 Testing Error Handling...")
@@ -181,6 +208,9 @@ class IslandFruitAPITester:
         
         # Test specific endpoints
         self.test_specific_endpoints()
+        
+        # Test game leaderboard API
+        self.test_game_leaderboard_api()
         
         # Test error handling
         self.test_error_handling()

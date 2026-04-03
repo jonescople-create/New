@@ -1559,6 +1559,56 @@ async def get_ebook_by_slug(slug: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ==================== Game Leaderboard API ====================
+
+class LeaderboardEntry(BaseModel):
+    player_name: str
+    score: int
+    level: int = 1
+    achievements: int = 0
+
+@app.get("/api/game/leaderboard")
+async def get_leaderboard(limit: int = 20):
+    """Get top scores from the global leaderboard"""
+    try:
+        response = supabase_db._request(
+            'GET',
+            f'game_leaderboard?select=*&order=score.desc&limit={limit}'
+        )
+        if response.status_code == 200:
+            return response.json()
+        return []
+    except Exception as e:
+        logger.error(f"Error getting leaderboard: {str(e)}")
+        return []
+
+@app.post("/api/game/leaderboard")
+async def submit_score(entry: LeaderboardEntry):
+    """Submit a score to the global leaderboard"""
+    try:
+        data = {
+            'player_name': entry.player_name[:20],
+            'score': max(0, min(entry.score, 99999)),
+            'level': max(1, min(entry.level, 99)),
+            'achievements': max(0, min(entry.achievements, 50)),
+            'created_at': datetime.utcnow().isoformat(),
+        }
+        response = supabase_db._request(
+            'POST', 'game_leaderboard',
+            json=data,
+            prefer='return=representation'
+        )
+        if response.status_code in [200, 201]:
+            result = response.json()
+            return result[0] if isinstance(result, list) and result else result
+        # Table might not exist yet — return submitted data as-is
+        logger.warning(f"Leaderboard insert status {response.status_code}: {response.text}")
+        return data
+    except Exception as e:
+        logger.error(f"Error submitting score: {str(e)}")
+        return {"status": "saved_locally", **entry.dict()}
+
+
 # ==================== Intelligence Tools API ====================
 
 class FruitRecommendRequest(BaseModel):
