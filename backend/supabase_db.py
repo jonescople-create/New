@@ -339,11 +339,15 @@ class SupabaseClient:
     def upsert_product_catalog(self, product: Dict) -> Dict:
         """Upsert a product by slug (merge on conflict)"""
         response = self._request(
-            'POST', 'products',
+            'POST', 'products?on_conflict=slug',
             prefer='return=representation,resolution=merge-duplicates',
             json=product
         )
-        return response.json()[0] if response.status_code in [200, 201] else {}
+        if response.status_code in [200, 201]:
+            data = response.json()
+            return data[0] if isinstance(data, list) and data else data
+        logger.error(f"Product upsert failed ({response.status_code}): {response.text[:200]}")
+        return {}
 
     def get_products_by_category(self, category: str) -> List[Dict]:
         """Get products filtered by category"""

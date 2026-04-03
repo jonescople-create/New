@@ -2118,35 +2118,35 @@ def _send_welcome_email(to_email: str):
 @app.post("/api/admin/sync-products")
 async def sync_products_to_supabase(payload: dict = Depends(verify_token)):
     """Sync all frontend products to Supabase products table"""
+    import uuid as _uuid
+
     PRODUCTS = [
-        {"slug": "tropical-juice-smoothie-recipes", "title": "Tropical Juice & Smoothie Recipes", "price": 9.99, "original_price": 14.99, "category": "recipe-pack", "short_description": "50 Caribbean-inspired smoothie and juice recipes with nutrition breakdowns.", "cover_image": "https://images.unsplash.com/photo-1622597467836-f3285f2131b8?w=400", "is_featured": False},
-        {"slug": "caribbean-fruit-guide", "title": "Caribbean Fruit Encyclopedia", "price": 14.99, "original_price": 24.99, "category": "ebook", "short_description": "The complete guide to 100+ Caribbean fruits — history, nutrition, and growing tips.", "cover_image": "https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=400", "is_featured": True},
-        {"slug": "fat-loss-smoothies", "title": "Caribbean Smoothies for Fat Loss", "price": 12.99, "original_price": 19.99, "category": "recipe-pack", "short_description": "30 calorie-counted tropical smoothie recipes designed for sustainable weight loss.", "cover_image": "https://images.unsplash.com/photo-1638176066666-ffb2f013c7dd?w=400", "is_featured": True},
-        {"slug": "healing-drinks", "title": "Tropical Superfruit Healing Drinks", "price": 11.99, "original_price": 17.99, "category": "recipe-pack", "short_description": "40 traditional Caribbean healing tonics and herbal drink recipes.", "cover_image": "https://images.unsplash.com/photo-1610970881699-44a5587cabec?w=400", "is_featured": False},
-        {"slug": "pre-workout-drinks", "title": "Island Pre-Workout Natural Fuel", "price": 10.99, "original_price": 15.99, "category": "recipe-pack", "short_description": "25 fruit-based pre-workout energy drinks — no synthetic supplements.", "cover_image": "https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=400", "is_featured": False},
-        {"slug": "mango-recipe-pack", "title": "Mango Recipe Collection", "price": 7.99, "original_price": 11.99, "category": "recipe-pack", "short_description": "15 creative mango recipes — from breakfast to dessert.", "cover_image": "https://images.unsplash.com/photo-1553279768-865429fa0078?w=400", "is_featured": False},
-        {"slug": "coconut-recipe-pack", "title": "Coconut Recipe Collection", "price": 7.99, "original_price": 11.99, "category": "recipe-pack", "short_description": "20 versatile coconut recipes using water, milk, oil, and flesh.", "cover_image": "https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=400", "is_featured": False},
-        {"slug": "medicinal-leaves-guide", "title": "Caribbean Medicinal Leaves Guide", "price": 13.99, "original_price": 21.99, "category": "ebook", "short_description": "50 medicinal plants of the Caribbean with preparation methods.", "cover_image": "https://images.unsplash.com/photo-1515694346937-94d85e39f29a?w=400", "is_featured": True},
-        {"slug": "papaya-recipe-pack", "title": "Papaya Recipe Collection", "price": 6.99, "original_price": 9.99, "category": "recipe-pack", "short_description": "12 refreshing papaya recipes for every meal of the day.", "cover_image": "https://images.unsplash.com/photo-1517282009859-f000ec3b26fe?w=400", "is_featured": False},
-        {"slug": "pineapple-recipe-pack", "title": "Pineapple Recipe Collection", "price": 7.99, "original_price": 11.99, "category": "recipe-pack", "short_description": "18 tropical pineapple recipes — drinks, desserts, and marinades.", "cover_image": "https://images.unsplash.com/photo-1550258987-190a2d41a8ba?w=400", "is_featured": False},
-        {"slug": "soursop-recipe-pack", "title": "Soursop Recipe Collection", "price": 7.99, "original_price": 11.99, "category": "recipe-pack", "short_description": "10 soursop recipes including the famous Caribbean soursop juice.", "cover_image": "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=400", "is_featured": False},
-        {"slug": "gym-energy", "title": "Tropical Gym Energy Recipes", "price": 14.99, "original_price": 22.99, "category": "recipe-pack", "short_description": "50+ gym-focused energy recipes using tropical fruits.", "cover_image": "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400", "is_featured": True},
-        {"slug": "smoothie-recipes", "title": "Island Smoothie Collection", "price": 8.99, "original_price": 13.99, "category": "recipe-pack", "short_description": "30 island-inspired smoothie recipes for every occasion.", "cover_image": "https://images.unsplash.com/photo-1505252585461-04db1eb84625?w=400", "is_featured": False},
+        {"slug": "tropical-juice-smoothie-recipes", "title": "Tropical Juice & Smoothie Recipes", "price": 9.99, "category": "recipe-pack", "short_description": "50 Caribbean-inspired smoothie and juice recipes with nutrition breakdowns.", "cover_image": "https://images.unsplash.com/photo-1622597467836-f3285f2131b8?w=400", "is_featured": False},
+        {"slug": "caribbean-fruit-guide", "title": "Caribbean Fruit Encyclopedia", "price": 14.99, "category": "ebook", "short_description": "The complete guide to 100+ Caribbean fruits — history, nutrition, and growing tips.", "cover_image": "https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=400", "is_featured": True},
+        {"slug": "fat-loss-smoothies", "title": "Caribbean Smoothies for Fat Loss", "price": 12.99, "category": "recipe-pack", "short_description": "30 calorie-counted tropical smoothie recipes designed for sustainable weight loss.", "cover_image": "https://images.unsplash.com/photo-1638176066666-ffb2f013c7dd?w=400", "is_featured": True},
+        {"slug": "healing-drinks", "title": "Tropical Superfruit Healing Drinks", "price": 11.99, "category": "recipe-pack", "short_description": "40 traditional Caribbean healing tonics and herbal drink recipes.", "cover_image": "https://images.unsplash.com/photo-1610970881699-44a5587cabec?w=400", "is_featured": False},
+        {"slug": "pre-workout-drinks", "title": "Island Pre-Workout Natural Fuel", "price": 10.99, "category": "recipe-pack", "short_description": "25 fruit-based pre-workout energy drinks — no synthetic supplements.", "cover_image": "https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=400", "is_featured": False},
+        {"slug": "mango-recipe-pack", "title": "Mango Recipe Collection", "price": 7.99, "category": "recipe-pack", "short_description": "15 creative mango recipes — from breakfast to dessert.", "cover_image": "https://images.unsplash.com/photo-1553279768-865429fa0078?w=400", "is_featured": False},
+        {"slug": "coconut-recipe-pack", "title": "Coconut Recipe Collection", "price": 7.99, "category": "recipe-pack", "short_description": "20 versatile coconut recipes using water, milk, oil, and flesh.", "cover_image": "https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=400", "is_featured": False},
+        {"slug": "medicinal-leaves-guide", "title": "Caribbean Medicinal Leaves Guide", "price": 13.99, "category": "ebook", "short_description": "50 medicinal plants of the Caribbean with preparation methods.", "cover_image": "https://images.unsplash.com/photo-1515694346937-94d85e39f29a?w=400", "is_featured": True},
+        {"slug": "papaya-recipe-pack", "title": "Papaya Recipe Collection", "price": 6.99, "category": "recipe-pack", "short_description": "12 refreshing papaya recipes for every meal of the day.", "cover_image": "https://images.unsplash.com/photo-1517282009859-f000ec3b26fe?w=400", "is_featured": False},
+        {"slug": "pineapple-recipe-pack", "title": "Pineapple Recipe Collection", "price": 7.99, "category": "recipe-pack", "short_description": "18 tropical pineapple recipes — drinks, desserts, and marinades.", "cover_image": "https://images.unsplash.com/photo-1550258987-190a2d41a8ba?w=400", "is_featured": False},
+        {"slug": "soursop-recipe-pack", "title": "Soursop Recipe Collection", "price": 7.99, "category": "recipe-pack", "short_description": "10 soursop recipes including the famous Caribbean soursop juice.", "cover_image": "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=400", "is_featured": False},
+        {"slug": "gym-energy", "title": "Tropical Gym Energy Recipes", "price": 14.99, "category": "recipe-pack", "short_description": "50+ gym-focused energy recipes using tropical fruits.", "cover_image": "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400", "is_featured": True},
+        {"slug": "smoothie-recipes", "title": "Island Smoothie Collection", "price": 8.99, "category": "recipe-pack", "short_description": "30 island-inspired smoothie recipes for every occasion.", "cover_image": "https://images.unsplash.com/photo-1505252585461-04db1eb84625?w=400", "is_featured": False},
     ]
 
     synced = 0
     for prod in PRODUCTS:
+        # Deterministic UUID from slug so same product always gets same ID
+        prod['id'] = str(_uuid.uuid5(_uuid.NAMESPACE_URL, f"ifg-product-{prod['slug']}"))
         result = supabase_db.upsert_product_catalog(prod)
         if result:
             synced += 1
+        else:
+            logger.warning(f"Failed to sync product: {prod['slug']}")
 
     return {"synced": synced, "total": len(PRODUCTS), "source": "supabase"}
-
-
-# Product lookup helper — Supabase only
-def get_product_helper(slug: str):
-    """Get product from Supabase by slug"""
-    return supabase_db.get_product_by_slug(slug)
 
 
 # ==================== Discount-aware PayPal ====================
