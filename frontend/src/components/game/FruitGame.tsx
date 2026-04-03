@@ -7,6 +7,7 @@ import { Leaderboard }        from './Leaderboard';
 import { ProgressBar }        from './ProgressBar';
 import { ShareScoreModal }    from './ShareScoreModal';
 import { GameSounds }         from './GameSounds';
+import { DailyChallengeWidget } from './DailyChallenge';
 import { EmailCaptureOverlay } from '../funnel/EmailCapture';
 import { LeadMagnet }         from '../funnel/LeadMagnet';
 import { OfferModal }         from '../funnel/OfferModal';
@@ -45,9 +46,9 @@ function loadScore(): number { try { return parseInt(localStorage.getItem(STORAG
 const STORE_TIPS = [
   { text: 'Did you know? Our Tropical Juice Book has 50 smoothie recipes!', cta: 'See Recipes', path: '/store/tropical-juice-smoothie-recipes' },
   { text: 'Unlock 100+ fruit profiles in the Caribbean Encyclopedia.', cta: 'Explore', path: '/store/caribbean-fruit-guide' },
-  { text: 'Fat loss smoothies? We have 30 calorie-counted recipes.', cta: 'Get the Book', path: '/store/fat-loss-smoothie-recipes' },
-  { text: 'Caribbean healing drinks - 40 traditional remedies inside.', cta: 'Discover', path: '/store/healing-drinks-recipes' },
-  { text: 'Pre-workout energy? 50 natural fruit-based fuel recipes.', cta: 'Power Up', path: '/store/pre-workout-energy-recipes' },
+  { text: 'Fat loss smoothies? We have 30 calorie-counted recipes.', cta: 'Get the Book', path: '/store/fat-loss-smoothies' },
+  { text: 'Caribbean healing drinks - 40 traditional remedies inside.', cta: 'Discover', path: '/store/healing-drinks' },
+  { text: 'Pre-workout energy? 50 natural fruit-based fuel recipes.', cta: 'Power Up', path: '/store/pre-workout-drinks' },
 ];
 
 const API = (import.meta as ImportMeta & { env: Record<string, string> }).env.VITE_API_URL || '';
@@ -74,6 +75,7 @@ export function FruitGame() {
   const [globalLeaderboard, setGlobalLeaderboard] = useState<any[]>([]);
   const [playerName, setPlayerName] = useState(() => localStorage.getItem('ifg_player_name') || '');
   const [showNameInput, setShowNameInput] = useState(false);
+  const [challengeReward, setChallengeReward] = useState<{ code: string; pct: number; description: string } | null>(null);
 
   const gate200 = useRef(false);
   const pendingOffer = useRef(false);
@@ -236,6 +238,10 @@ export function FruitGame() {
   const handleEmailCaptured = (email: string) => { setCapturedEmail(email); captureEmail(email, 'game', interest); setOverlay('leadMagnet'); pendingOffer.current = true; };
   const handleLeadMagnetClose = () => { setOverlay(pendingOffer.current ? 'offer' : 'none'); pendingOffer.current = false; };
   const handleDailyClaim = () => { if (dailyResult?.reward.isPremium && !hasCapturedEmail()) setOverlay('emailCapture'); else setOverlay('none'); };
+  const handleChallengeComplete = useCallback((reward: { code: string; pct: number; description: string }) => {
+    setChallengeReward(reward);
+    GameSounds.achievement();
+  }, []);
 
   const Milestones = () => (
     <div className="w-full max-w-sm">
@@ -299,6 +305,9 @@ export function FruitGame() {
             </div>
             <div className="w-full max-w-sm"><ProgressBar xp={xp} /></div>
             <Leaderboard currentScore={loadScore()} unlockedCount={unlockedSet.size} streak={dailyResult?.streak ?? 0} />
+
+            {/* Daily Challenge */}
+            <DailyChallengeWidget currentScore={0} isPlaying={false} onChallengeComplete={handleChallengeComplete} />
 
             {/* Achievements summary */}
             <button onClick={() => setOverlay('achievements')} data-testid="view-achievements-btn"
@@ -364,6 +373,7 @@ export function FruitGame() {
         {screen === 'playing' && (
           <div className={`flex flex-col items-center gap-3 w-full ${isFullscreen ? 'flex-1 justify-center' : ''}`}>
             {!isFullscreen && <div className="w-full max-w-lg"><ProgressBar xp={xp} compact /></div>}
+            <DailyChallengeWidget currentScore={score} isPlaying={true} onChallengeComplete={handleChallengeComplete} />
             <GameCanvas
               onScoreChange={handleScoreChange}
               onGameOver={handleGameOver}
@@ -414,6 +424,30 @@ export function FruitGame() {
                     </div>
                   ) : null;
                 })}
+              </div>
+            )}
+
+            {/* Challenge reward earned */}
+            {challengeReward && (
+              <div className="bg-gradient-to-r from-orange-500/15 to-yellow-500/15 rounded-2xl p-4 w-full max-w-sm border border-orange-400/30" data-testid="challenge-reward-earned">
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-3xl">🏆</span>
+                  <div>
+                    <p className="text-white font-black text-sm">Daily Challenge Complete!</p>
+                    <p className="text-white/60 text-xs">{challengeReward.description}</p>
+                  </div>
+                </div>
+                <div className="bg-charcoal/50 rounded-xl px-4 py-2 text-center">
+                  <p className="text-[10px] text-white/40 uppercase tracking-wider mb-0.5">Your Reward Code</p>
+                  <span className="font-heading font-black text-2xl text-mango tracking-widest">{challengeReward.code}</span>
+                </div>
+                <button
+                  onClick={() => setOverlay('offer')}
+                  className="w-full mt-3 bg-gradient-to-r from-orange-500 to-amber-500 text-charcoal font-bold text-sm py-2.5 rounded-xl hover:from-amber-500 hover:to-orange-500 transition-all"
+                  data-testid="use-challenge-code-btn"
+                >
+                  🎁 Use Code — {challengeReward.pct}% OFF
+                </button>
               </div>
             )}
 
@@ -477,7 +511,8 @@ export function FruitGame() {
         <LeadMagnet email={capturedEmail} onClose={handleLeadMagnetClose} onViewStore={() => { setOverlay('none'); navigate('/store'); }} />
       )}
       {overlay === 'offer' && (
-        <OfferModal interest={interest} gameScore={score} onClose={() => setOverlay('none')} />
+        <OfferModal interest={interest} gameScore={score} onClose={() => setOverlay('none')}
+          challengeReward={challengeReward || undefined} />
       )}
       {overlay === 'share' && (
         <ShareScoreModal score={score} highScore={highScore} level={gameStats.level} achievementCount={achUnlocked.size} onClose={() => setOverlay('none')} />

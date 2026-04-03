@@ -1559,7 +1559,14 @@ async def get_ebook_by_slug(slug: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# ==================== Game Leaderboard API ====================
+# ==================== Game Leaderboard API (MongoDB-backed) ====================
+
+from motor.motor_asyncio import AsyncIOMotorClient
+
+MONGO_URL = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
+DB_NAME = os.environ.get('DB_NAME', 'test_database')
+mongo_client = AsyncIOMotorClient(MONGO_URL)
+mongo_db = mongo_client[DB_NAME]
 
 class LeaderboardEntry(BaseModel):
     player_name: str
@@ -1567,17 +1574,28 @@ class LeaderboardEntry(BaseModel):
     level: int = 1
     achievements: int = 0
 
+class EmailSubscriber(BaseModel):
+    email: str
+    source: str = 'game'
+    interest: str = 'general'
+    discount_code: str = ''
+
+class DailyChallengeResponse(BaseModel):
+    target_score: int
+    reward_code: str
+    reward_description: str
+    expires_at: str
+    theme: str
+
 @app.get("/api/game/leaderboard")
 async def get_leaderboard(limit: int = 20):
     """Get top scores from the global leaderboard"""
     try:
-        response = supabase_db._request(
-            'GET',
-            f'game_leaderboard?select=*&order=score.desc&limit={limit}'
-        )
-        if response.status_code == 200:
-            return response.json()
-        return []
+        cursor = mongo_db.game_leaderboard.find(
+            {}, {"_id": 0}
+        ).sort("score", -1).limit(limit)
+        entries = await cursor.to_list(length=limit)
+        return entries
     except Exception as e:
         logger.error(f"Error getting leaderboard: {str(e)}")
         return []
@@ -1587,26 +1605,190 @@ async def submit_score(entry: LeaderboardEntry):
     """Submit a score to the global leaderboard"""
     try:
         data = {
-            'player_name': entry.player_name[:20],
+            'player_name': entry.player_name[:20].strip(),
             'score': max(0, min(entry.score, 99999)),
             'level': max(1, min(entry.level, 99)),
             'achievements': max(0, min(entry.achievements, 50)),
             'created_at': datetime.utcnow().isoformat(),
         }
-        response = supabase_db._request(
-            'POST', 'game_leaderboard',
-            json=data,
-            prefer='return=representation'
-        )
-        if response.status_code in [200, 201]:
-            result = response.json()
-            return result[0] if isinstance(result, list) and result else result
-        # Table might not exist yet — return submitted data as-is
-        logger.warning(f"Leaderboard insert status {response.status_code}: {response.text}")
+        await mongo_db.game_leaderboard.insert_one(data)
+        data.pop('_id', None)
         return data
     except Exception as e:
         logger.error(f"Error submitting score: {str(e)}")
-        return {"status": "saved_locally", **entry.dict()}
+        return {"status": "error", "message": str(e)}
+
+# ==================== Email Subscriber + Discount Code API ====================
+
+DISCOUNT_CODES = {
+    'IFG20': {'discount_pct': 20, 'description': '20% off your first ebook', 'active': True},
+    'FRUIT10': {'discount_pct': 10, 'description': '10% off any recipe pack', 'active': True},
+    'CHALLENGE25': {'discount_pct': 25, 'description': '25% off — Daily Challenge reward', 'active': True},
+}
+
+@app.post("/api/subscribe")
+async def subscribe_email(subscriber: EmailSubscriber):
+    """Subscribe email, send discount code IFG20 + track"""
+    try:
+        email = subscriber.email.strip().lower()
+        if not email or '@' not in email:
+            raise HTTPException(status_code=400, detail="Invalid email")
+        
+        # Check if already subscribed
+        existing = await mongo_db.email_subscribers.find_one({"email": email})
+        if existing:
+            return {
+                "status": "already_subscribed",
+                "email": email,
+                "discount_code": "IFG20",
+                "discount_pct": 20,
+                "message": "You're already subscribed! Your code IFG20 is still valid."
+            }
+        
+        data = {
+            'email': email,
+            'source': subscriber.source,
+            'interest': subscriber.interest,
+            'discount_code': 'IFG20',
+            'subscribed_at': datetime.utcnow().isoformat(),
+            'discount_used': False,
+        }
+        await mongo_db.email_subscribers.insert_one(data)
+        data.pop('_id', None)
+        
+        logger.info(f"New subscriber: {email} from {subscriber.source}")
+        return {
+            "status": "subscribed",
+            "email": email,
+            "discount_code": "IFG20",
+            "discount_pct": 20,
+            "message": "Welcome! Use code IFG20 for 20% off your first ebook. Your free Caribbean Fruit Guide PDF is on its way!"
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error subscribing: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/subscribe/check/{email}")
+async def check_subscriber(email: str):
+    """Check if email is subscribed and return their discount"""
+    try:
+        email = email.strip().lower()
+        existing = await mongo_db.email_subscribers.find_one({"email": email}, {"_id": 0})
+        if existing:
+            return {"subscribed": True, "discount_code": "IFG20", "discount_pct": 20, **existing}
+        return {"subscribed": False}
+    except Exception as e:
+        logger.error(f"Error checking subscriber: {str(e)}")
+        return {"subscribed": False}
+
+@app.post("/api/discount/validate")
+async def validate_discount(request: Request):
+    """Validate a discount code"""
+    try:
+        body = await request.json()
+        code = body.get('code', '').strip().upper()
+        if code in DISCOUNT_CODES and DISCOUNT_CODES[code]['active']:
+            info = DISCOUNT_CODES[code]
+            return {"valid": True, "code": code, "discount_pct": info['discount_pct'], "description": info['description']}
+        return {"valid": False, "code": code, "message": "Invalid or expired discount code"}
+    except Exception as e:
+        logger.error(f"Error validating discount: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ==================== Daily Challenge API ====================
+
+import hashlib
+
+def get_daily_challenge():
+    """Generate a daily challenge based on the date"""
+    today = datetime.utcnow().strftime('%Y-%m-%d')
+    seed = int(hashlib.md5(today.encode()).hexdigest()[:8], 16)
+    
+    targets = [150, 200, 250, 300, 350, 200, 175]
+    themes = [
+        ('Mango Monday', 'Catch mangoes like a pro!'),
+        ('Tropical Tuesday', 'Show off your island skills!'),
+        ('Wildcard Wednesday', 'Anything goes — go wild!'),
+        ('Throwback Thursday', 'Old school fruit catching!'),
+        ('Frenzy Friday', 'Frenzy mode activated!'),
+        ('Smoothie Saturday', 'Blend those scores up!'),
+        ('Soursop Sunday', 'Chill vibes, big scores!'),
+    ]
+    
+    day_of_week = datetime.utcnow().weekday()
+    target = targets[day_of_week] + (seed % 50)
+    theme_name, theme_desc = themes[day_of_week]
+    
+    # Tomorrow midnight UTC
+    tomorrow = (datetime.utcnow() + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+    
+    return {
+        'target_score': target,
+        'reward_code': 'CHALLENGE25',
+        'reward_description': '25% off any ebook — earned by completing the Daily Challenge!',
+        'expires_at': tomorrow.isoformat(),
+        'theme': theme_name,
+        'theme_description': theme_desc,
+        'date': today,
+    }
+
+@app.get("/api/game/daily-challenge")
+async def daily_challenge():
+    """Get today's daily challenge"""
+    return get_daily_challenge()
+
+@app.post("/api/game/daily-challenge/complete")
+async def complete_daily_challenge(request: Request):
+    """Mark daily challenge as complete and issue reward"""
+    try:
+        body = await request.json()
+        score = body.get('score', 0)
+        player_name = body.get('player_name', 'Anonymous')
+        
+        challenge = get_daily_challenge()
+        if score >= challenge['target_score']:
+            # Record completion
+            await mongo_db.challenge_completions.insert_one({
+                'player_name': player_name[:20],
+                'score': score,
+                'target': challenge['target_score'],
+                'date': challenge['date'],
+                'completed_at': datetime.utcnow().isoformat(),
+            })
+            
+            return {
+                "completed": True,
+                "reward_code": "CHALLENGE25",
+                "reward_description": "25% off any ebook!",
+                "message": f"You crushed it with {score} pts! Use code CHALLENGE25 at checkout for 25% off."
+            }
+        else:
+            return {
+                "completed": False,
+                "score": score,
+                "target": challenge['target_score'],
+                "remaining": challenge['target_score'] - score,
+                "message": f"So close! You need {challenge['target_score'] - score} more points. Play again!"
+            }
+    except Exception as e:
+        logger.error(f"Error completing challenge: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/game/daily-challenge/leaderboard")
+async def daily_challenge_leaderboard():
+    """Get today's challenge completions"""
+    try:
+        today = datetime.utcnow().strftime('%Y-%m-%d')
+        cursor = mongo_db.challenge_completions.find(
+            {"date": today}, {"_id": 0}
+        ).sort("score", -1).limit(10)
+        entries = await cursor.to_list(length=10)
+        return entries
+    except Exception as e:
+        logger.error(f"Error getting challenge leaderboard: {str(e)}")
+        return []
 
 
 # ==================== Intelligence Tools API ====================

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-Backend API Testing for IslandFruitGuide
+Backend API Testing for IslandFruitGuide - Iteration 3
 Tests all API endpoints for the Caribbean fruit e-commerce website
+New features: MongoDB leaderboard, email subscription, discount validation, daily challenges
 """
 
 import requests
@@ -183,6 +184,137 @@ class IslandFruitAPITester:
         # Test with limit parameter
         self.test_api_endpoint("Get Leaderboard with Limit", "GET", "game/leaderboard?limit=5", 200)
 
+    def test_email_subscription_api(self):
+        """Test email subscription with IFG20 discount code"""
+        print("\n📧 Testing Email Subscription API...")
+        
+        # Test new email subscription
+        test_email = f"test_{datetime.now().strftime('%H%M%S')}@example.com"
+        success, response = self.test_api_endpoint(
+            "Subscribe New Email", "POST", "subscribe", 200,
+            {"email": test_email, "source": "game", "interest": "general"}
+        )
+        
+        if success and response:
+            expected_status = response.get('status')
+            expected_code = response.get('discount_code')
+            expected_pct = response.get('discount_pct')
+            
+            if expected_status == 'subscribed' and expected_code == 'IFG20' and expected_pct == 20:
+                print(f"   ✅ New subscription returns correct IFG20 discount")
+            else:
+                print(f"   ❌ Unexpected response: status={expected_status}, code={expected_code}, pct={expected_pct}")
+        
+        # Test existing email subscription
+        self.test_api_endpoint(
+            "Subscribe Existing Email", "POST", "subscribe", 200,
+            {"email": test_email, "source": "game", "interest": "general"}
+        )
+
+    def test_discount_validation_api(self):
+        """Test discount code validation"""
+        print("\n🎫 Testing Discount Validation API...")
+        
+        # Test valid IFG20 code
+        success, response = self.test_api_endpoint(
+            "Validate IFG20 Code", "POST", "discount/validate", 200,
+            {"code": "IFG20"}
+        )
+        
+        if success and response:
+            if response.get('valid') == True and response.get('discount_pct') == 20:
+                print(f"   ✅ IFG20 validation successful")
+            else:
+                print(f"   ❌ IFG20 validation failed: {response}")
+        
+        # Test valid CHALLENGE25 code
+        success, response = self.test_api_endpoint(
+            "Validate CHALLENGE25 Code", "POST", "discount/validate", 200,
+            {"code": "CHALLENGE25"}
+        )
+        
+        if success and response:
+            if response.get('valid') == True and response.get('discount_pct') == 25:
+                print(f"   ✅ CHALLENGE25 validation successful")
+            else:
+                print(f"   ❌ CHALLENGE25 validation failed: {response}")
+        
+        # Test invalid code
+        success, response = self.test_api_endpoint(
+            "Validate Invalid Code", "POST", "discount/validate", 200,
+            {"code": "INVALID123"}
+        )
+        
+        if success and response:
+            if response.get('valid') == False:
+                print(f"   ✅ Invalid code correctly rejected")
+            else:
+                print(f"   ❌ Invalid code should be rejected: {response}")
+
+    def test_daily_challenge_api(self):
+        """Test daily challenge system"""
+        print("\n🎯 Testing Daily Challenge API...")
+        
+        # Test get daily challenge
+        success, response = self.test_api_endpoint(
+            "Get Daily Challenge", "GET", "game/daily-challenge", 200
+        )
+        
+        target_score = 100  # default
+        if success and response:
+            required_fields = ['target_score', 'reward_code', 'theme', 'expires_at']
+            missing_fields = [f for f in required_fields if f not in response]
+            
+            if not missing_fields:
+                print(f"   ✅ Daily challenge structure correct")
+                target_score = response.get('target_score', 100)
+                
+                if response.get('reward_code') == 'CHALLENGE25':
+                    print(f"   ✅ Reward code is CHALLENGE25")
+                else:
+                    print(f"   ❌ Expected CHALLENGE25, got {response.get('reward_code')}")
+            else:
+                print(f"   ❌ Missing fields: {missing_fields}")
+        
+        # Test complete challenge above target
+        success, response = self.test_api_endpoint(
+            "Complete Challenge (Above Target)", "POST", "game/daily-challenge/complete", 200,
+            {"score": target_score + 50, "player_name": "TestPlayer"}
+        )
+        
+        if success and response:
+            if response.get('completed') == True and response.get('reward_code') == 'CHALLENGE25':
+                print(f"   ✅ Challenge completion (above target) successful")
+            else:
+                print(f"   ❌ Challenge completion failed: {response}")
+        
+        # Test complete challenge below target
+        success, response = self.test_api_endpoint(
+            "Complete Challenge (Below Target)", "POST", "game/daily-challenge/complete", 200,
+            {"score": max(1, target_score - 50), "player_name": "TestPlayer"}
+        )
+        
+        if success and response:
+            if response.get('completed') == False and 'remaining' in response:
+                print(f"   ✅ Challenge completion (below target) successful")
+            else:
+                print(f"   ❌ Challenge completion below target failed: {response}")
+
+    def test_product_slug_endpoints(self):
+        """Test product slug deep links"""
+        print("\n🛍️ Testing Product Slug Endpoints...")
+        
+        # Test specific product slug
+        success, response = self.test_api_endpoint(
+            "Get Product by Slug", "GET", "products/tropical-juice-smoothie-recipes", 200
+        )
+        
+        if success and response:
+            if response.get('slug') == 'tropical-juice-smoothie-recipes':
+                print(f"   ✅ Product slug deep link working")
+            else:
+                print(f"   ❌ Wrong slug returned: {response.get('slug')}")
+
     def test_error_handling(self):
         """Test error handling for non-existent resources"""
         print("\n🚫 Testing Error Handling...")
@@ -193,7 +325,7 @@ class IslandFruitAPITester:
 
     def run_all_tests(self):
         """Run all backend tests"""
-        print("🧪 Starting IslandFruitGuide Backend API Tests")
+        print("🧪 Starting IslandFruitGuide Backend API Tests - Iteration 3")
         print(f"🌐 Testing against: {self.base_url}")
         print("=" * 60)
         
@@ -211,6 +343,12 @@ class IslandFruitAPITester:
         
         # Test game leaderboard API
         self.test_game_leaderboard_api()
+        
+        # Test new iteration 3 features
+        self.test_email_subscription_api()
+        self.test_discount_validation_api()
+        self.test_daily_challenge_api()
+        self.test_product_slug_endpoints()
         
         # Test error handling
         self.test_error_handling()
