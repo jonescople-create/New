@@ -1,0 +1,153 @@
+<analysis>**original_problem_statement**: Scan this zip with website and state recommendations and fix bugs, create a backend (or expand if already wired for Supabase). No rebuilds, only build what's necessary and expand. Keep current design. Make the fruit game more addictive and a money machine to drive sales.
+
+PRODUCT REQUIREMENTS:
+- Fix existing bugs in the codebase.
+- Enhance the Fruit Catcher game (addictive features, full-screen mode, sounds, achievements).
+- Connect game outcomes (milestones/daily challenges) to store discounts to drive sales.
+- Ensure Supabase is properly integrated for products, leaderboards, orders, and email captures.
+- Integrate PayPal checkout with discount code capabilities.
+- Integrate Resend for sending email PDFs and discount codes.
+- Prepare a Node.js Express deployment package for Hostinger.
+
+**User's preferred language**: English (INSTRUCT next agent to respond in English only).
+
+**what currently exists?**: 
+A fully functional React (Vite) frontend with a FastAPI backend, along with a production-ready Hostinger deployment package () that uses a Node.js (Express) backend. The platform is a Caribbean fruit e-commerce store with an addictive Fruit Catcher canvas game. It features PayPal checkout, Resend email capture, daily challenges generating discount codes, and Supabase integration.
+
+**Last working item**:
+    - Last item agent was working: Migrating the backend storage entirely from MongoDB to Supabase. The agent had previously used MongoDB as a fallback because the provided Supabase Anon Key lacked insert privileges. In the final message, the user provided the . The agent successfully mapped the existing Supabase schemas and synced all 13 products to the Supabase  table, but still needs to rewrite the API routes to use Supabase exclusively.
+    - Status: IN PROGRESS
+    - Agent Testing Done: N
+    - Which testing method agent to use?: backend testing agent
+    - User Testing Done: N
+
+**All Pending/In progress Issue list**:
+  Issue 1: Complete Backend Migration from MongoDB to Supabase (P0)
+     - Attempted fixes: Agent mapped the table structures (, , ) and synced the products successfully via CLI.
+     - Next debug checklist: Check  and . Completely remove the  (MongoDB) dependencies and rewrite the , , , and PayPal order endpoints to use the Supabase client initialized with .
+     - Why fix this issue and what will be achieved with the fix?: Simplifies architecture by dropping the temporary MongoDB crutch, fully utilizing the user's Supabase instance as requested.
+     - Status: IN PROGRESS
+     - Is recurring issue?: N
+     - Should Test frontend/backend/both after fix?: both
+     - Blocked on other issue: None
+
+**In progress Task List**:
+  Task 1: Update Hostinger Deployment Package (P0)
+     - Where to resume: 
+     - What will be achieved with this?: Ensures the final deployment zip intended for Hostinger uses the new Supabase-only architecture instead of MongoDB.
+     - Status: NOT STARTED
+     - Should Test frontend/backend/both after fix?: backend
+     - Blocked on something: Issue 1 (Needs FastAPI Supabase logic fully mapped first for reference)
+
+**Upcoming and Future Tasks**:
+    Upcoming Tasks:
+    - Test email capture, leaderboard submission, and order creation workflows end-to-end directly against Supabase to verify schema compatibility. (P0)
+    Future Tasks:
+    - Implement a referral system (FRIEND15 discount). When players share their high score and someone signs up through their link, both receive a 15% off discount code. (P1)
+
+**Completed work in this session**:
+- Fixed frontend bugs (Vite/Tailwind setup, GameCanvas RAF pause bug, FruitCard button nesting) (, , ).
+- Fixed backend bugs (duplicate endpoints, unreachable code, Admin bcrypt version error) ().
+- Enhanced Fruit Catcher game (Fullscreen, Sound effects, Power-ups, Combo system, Achievements) (, ).
+- Added Daily Challenge system with discount code rewards ().
+- Integrated Resend for email delivery upon subscription ().
+- Integrated discount logic into the PayPal checkout flow.
+- Created Hostinger Node.js Express deployment package (, ).
+- Synced all 13 frontend products to the Supabase  table.
+
+**Earlier issues found/mentioned but not fixed**:
+    None
+
+**Known issue recurrence from previous fork**:
+  - Issue recurrence in previous fork: N/A (First session)
+  - Recurrence count: 0
+  - Status: NOT STARTED
+
+**Code Architecture**:
+
+
+**Key Technical Concepts**:
+React.js, Vite, TailwindCSS v4, TypeScript, FastAPI (Python), Node.js (Express), Supabase (PostgreSQL), PayPal REST SDK, Resend API, Canvas API, Web Audio API.
+
+**key DB schema**:
+  - : {id, title, slug, category, price, short_description, long_description, cover_image, etc.}
+  - : {email, best_score, best_level, total_xp, games_played}
+  - : {email, source, product_slug, captured_at, unsubscribed}
+  - : {id, order_number, customer_name, customer_email, customer_address, items, subtotal, tax, shipping, total, status, created_at}
+
+**changes in tech stack**:
+  - Replaced MongoDB dependency entirely with Supabase (PostgreSQL) after receiving the Supabase Service Role Key.
+  - Added a parallel Node.js (Express) backend specifically designed for the Hostinger deployment architecture.
+
+**All files of reference**:
+  1.  (Main Python backend - needs MongoDB removed)
+  2.  (Main Node backend - needs MongoDB removed)
+  3.  &  (Core game logic)
+  4.  (Contains admin credentials and user data)
+  5.  (Project requirements document)
+
+**Areas that need refactoring**:
+ and  currently contain hybrid logic connecting to MongoDB. These need to be purely refactored to use Supabase with the .
+
+**key api endpoints**:
+  -  & 
+  -  (Resend email capture)
+  -  & 
+  -  & 
+
+**Critical Info for New Agent**:
+- **SUPABASE SERVICE ROLE KEY**: The user provided the  key in their final message. This key bypasses Row Level Security (RLS). You MUST use this key on the backend to insert/update records in , , , and . 
+- Completely drop and delete all MongoDB/Motor logic. It was only added as a fallback when we didn't have write access to Supabase.
+- Always remember to update both the FastAPI backend () AND the Hostinger Node.js deployment backend () to ensure they share the exact same updated logic.
+- When generating the final delivery, remember to re-zip the Hostinger deployment package ().
+
+**documents and test reports created in this job**:
+  - /app/memory/PRD.md
+  - /app/memory/test_credentials.md
+  - /app/test_reports/iteration_1.json
+  - /app/test_reports/iteration_2.json
+  - /app/test_reports/iteration_3.json
+  - /app/test_reports/iteration_4.json
+  - /app/hostinger-deploy/DEPLOYMENT_GUIDE.md
+
+**Last 10 User Messages and any pending HUMAN messages**:
+ 1. Scan this zip with website and state recommendations... fix bugs... expand (Completed)
+ 2. 1.fruit website with ecommerce 2.not sure if theres any 3.check existing config... (Completed)
+ 3. Please do all and allow game to become full screen if user wants to play full on (Completed)
+ 4. Create game_leaderboard table in Supabase... Add matching product slugs in Supabase... (Completed)
+ 5. Prepare for hostinger node.js upload and deploy. Next Action Items Integrate email delivery... (Completed)
+ 6. 1.Resend,i believe there is an api key present... 5.push all 13 products from products.ts into your Supabase (Completed)
+ 7.  (Resend Key provided) (Completed)
+ 8. what do you need from hostinger to use it fully for all you need? (Completed - Answered)
+ 9. i meant supabase, (Completed - Answered)
+ 10.  (Supabase Service Role key provided) (In Progress - API rewrites pending)
+
+**Project Health Check:**
+- Broken: Backend API is currently mid-transition between MongoDB and Supabase Service Role Key.
+- Mocked: None (Using real APIs for PayPal, Resend, and Supabase).
+
+**3rd Party Integrations**:
+ - Supabase (Database) — requires User API Key & Service Role Key
+ - PayPal (Payments) — requires User API Key (Sandbox keys in .env)
+ - Resend (Email Delivery) — requires User API Key
+
+**Testing status**:
+  - Testing agent used after significant changes: YES (Iterations 1 through 4)
+  - Troubleshoot agent used after agent stuck in loop: NO
+  - Test files created:  to 
+  - Known regressions: Backend endpoints mapping is mid-transition.
+
+**Credentials to test flow**:
+Check  for admin logins and discount codes.
+
+**What agent forgot to execute**:
+The agent mapped the new Supabase schemas and synced the products successfully but stopped processing right before refactoring the actual code inside  and  to utilize the new Supabase tables. 
+
+**Debugging checklist for current issue**
+    Issue: Backend endpoints still referencing MongoDB instead of Supabase.
+    Backend files to check: 
+    - 
+    - 
+    Database to check: 
+    - Supabase (ensure  is utilized in server env variables)
+    </analysis>

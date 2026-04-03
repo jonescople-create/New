@@ -9,7 +9,7 @@ import json
 from datetime import datetime
 
 class CaribbeanFruitAPITester:
-    def __init__(self, base_url="https://scan-fix-expand.preview.emergentagent.com"):
+    def __init__(self, base_url="https://game-ecommerce-suite.preview.emergentagent.com"):
         self.base_url = base_url
         self.token = None
         self.tests_run = 0
