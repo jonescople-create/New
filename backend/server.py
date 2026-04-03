@@ -800,8 +800,14 @@ def write_products_to_file(products: List[dict]):
 
 @app.get("/api/products")
 async def get_all_products():
-    """Get all store products (public endpoint)"""
+    """Get all store products (public endpoint) — MongoDB catalog first, then Supabase"""
     try:
+        # Try MongoDB catalog first (has all 13 synced products)
+        if mongo_db is not None:
+            docs = await mongo_db.products_catalog.find({}, {"_id": 0}).to_list(length=100)
+            if docs:
+                return docs
+        # Fallback to Supabase
         products = read_products_from_file()
         return products
     except Exception as e:
@@ -812,6 +818,10 @@ async def get_all_products():
 async def get_products_by_category(category: str):
     """Get products by category (public endpoint)"""
     try:
+        if mongo_db is not None:
+            docs = await mongo_db.products_catalog.find({"category": category}, {"_id": 0}).to_list(length=100)
+            if docs:
+                return docs
         products = read_products_from_file()
         filtered = [p for p in products if p.get("category") == category]
         return filtered

@@ -1,73 +1,78 @@
 # IslandFruitGuide PRD
 
 ## Problem Statement
-User uploaded a zip of their Caribbean fruit e-commerce website (IslandFruitGuide). Task: scan for bugs, fix them, expand the fruit catcher game to be more addictive and a money machine to drive ebook sales. Keep existing design, no rebuilds — only fix and expand.
+Caribbean fruit e-commerce website with addictive fruit catcher game as a sales funnel. Needs Hostinger Node.js deployment, email delivery via Resend, discount code integration in PayPal checkout, and full product catalog sync.
 
 ## Architecture
 - **Frontend**: Vite + React 19 + TypeScript + TailwindCSS v4
-- **Backend**: FastAPI (Python) + Supabase PostgreSQL + MongoDB (game data)
-- **Payments**: PayPal (sandbox + live)
-- **Hosting**: Emergent platform (frontend port 3000, backend port 8001)
+- **Backend (Emergent)**: FastAPI (Python) + Supabase + MongoDB
+- **Backend (Hostinger)**: Express.js (Node.js) + Supabase + MongoDB
+- **Email**: Resend API (transactional emails with IFG20 code)
+- **Payments**: PayPal (sandbox + live) with server-side discount validation
+- **Database**: Supabase PostgreSQL (fruits, recipes, ebooks) + MongoDB (products catalog, leaderboard, subscribers, orders)
 
 ## What's Been Implemented
 
 ### Session 1 — Bug Fixes
-1. server.py duplicate function, unreachable code, admin credentials
-2. GameCanvas pause bug (RAF loop dying)
-3. FruitCard button nesting, Vite HMR config
+- server.py duplicate function, unreachable code, admin credentials
+- GameCanvas pause bug, FruitCard button nesting, Vite HMR config
 
 ### Session 2 — Game Enhancement
-1. Sound effects (Web Audio API, 10 sounds)
-2. Fullscreen mode with dynamic canvas resize
-3. 15-achievement system with persistence
-4. Global leaderboard + social sharing
-5. Combo system, 4 power-ups, visual juice, level progression
+- Sound effects (Web Audio API), fullscreen mode, 15 achievements
+- Global leaderboard, social sharing, combo system, 4 power-ups, visual juice
 
-### Session 3 — Monetization + Daily Challenge (April 3, 2026)
-1. **MongoDB-backed leaderboard** — Replaced Supabase fallback with reliable MongoDB persistence for game_leaderboard, email_subscribers, challenge_completions
-2. **Email subscribe API** (`POST /api/subscribe`) — Returns IFG20 discount code (20% off) + handles already-subscribed gracefully
-3. **Discount validation API** (`POST /api/discount/validate`) — Validates IFG20, FRUIT10, CHALLENGE25 codes
-4. **Daily Challenge System**:
-   - `GET /api/game/daily-challenge` — Returns daily target score, theme (Mango Monday, Frenzy Friday, etc.), countdown timer, reward code CHALLENGE25
-   - `POST /api/game/daily-challenge/complete` — Validates completion, issues reward
-   - `GET /api/game/daily-challenge/leaderboard` — Today's challenge top completions
-   - Frontend `DailyChallengeWidget` — Shows in start screen (full) and during gameplay (compact progress bar)
-5. **Enhanced Email Capture** — Full IFG20 discount flow: email input → subscribe API → shows discount code card + "FREE Caribbean Fruit Guide PDF" confirmation
-6. **Enhanced OfferModal** — Shows applicable discount (IFG20 for subscribers, CHALLENGE25 for challenge completers), price breakdown with savings, copy-code button
-7. **Fixed product slug deep links** — Store tips now use correct slugs matching products.ts (fat-loss-smoothies, healing-drinks, pre-workout-drinks)
-8. **Product slug API fallback** — Partial slug matching for Supabase ↔ frontend data discrepancies
+### Session 3 — Monetization
+- MongoDB leaderboard, email subscribe with IFG20, discount validation
+- Daily challenge system with CHALLENGE25 reward
+
+### Session 4 — Deployment + Full Integration (April 3, 2026)
+1. **Resend Email Delivery** — Welcome email with IFG20 discount code sent on subscribe. HTML template with branded design, discount card, store CTA.
+2. **Discount-Aware Checkout** — `POST /api/checkout/create-order` applies discount codes server-side (IFG20=20%, CHALLENGE25=25%, FRUIT10=10%). Creates order in MongoDB with full audit trail.
+3. **Product Catalog Sync** — All 13 products synced to MongoDB. `/api/products` now returns full catalog (was 4 from Supabase, now 13 from MongoDB).
+4. **Hostinger Node.js Backend** — Complete Express.js port of all Python FastAPI endpoints:
+   - Products, Fruits, Recipes, Ebooks, Bundles, Config
+   - Game: Leaderboard, Daily Challenge, Challenge Completion
+   - Email: Subscribe, Check, Discount Validate
+   - Checkout: Create Order with discount
+   - Admin: Login, Sync Products, Subscribers, Orders
+   - SPA fallback (serves React build from /public)
+5. **Deployment Package** — `/app/hostinger-deploy.zip` (518KB) containing:
+   - `backend/server.js` — Production Node.js server
+   - `backend/public/` — Built React frontend (Vite output)
+   - `backend/.env` — Configuration template
+   - `DEPLOYMENT_GUIDE.md` — Step-by-step Hostinger setup guide
 
 ### Testing Results
-- **Iteration 1**: 85% (all core flows passing)
-- **Iteration 2**: 95% (100% frontend — fullscreen, sounds, achievements)
-- **Iteration 3**: 95%/84.8% (all new features pass — subscribe, discount, challenge, leaderboard. Backend product slug 404s are data gaps in Supabase, not code bugs.)
+- Iteration 1: 85% | Iteration 2: 95% | Iteration 3: 95% | Iteration 4: 96.8% backend, 85% frontend
 
 ## Discount Codes
-| Code | Discount | Trigger |
-|------|----------|---------|
-| IFG20 | 20% off first ebook | Email signup |
-| FRUIT10 | 10% off recipe pack | Future promo |
-| CHALLENGE25 | 25% off any ebook | Daily challenge completion |
+| Code | Discount | Trigger | Active |
+|------|----------|---------|--------|
+| IFG20 | 20% off first ebook | Email signup | Yes |
+| FRUIT10 | 10% off recipe pack | Future promo | Yes |
+| CHALLENGE25 | 25% off any ebook | Daily challenge completion | Yes |
+
+## API Summary (31 endpoints)
+Products (3), Fruits (2), Recipes (2), Ebooks (2), Bundles (1), Config (1), Game (5), Subscribe (3), Checkout (1), Admin (5), Health (1)
 
 ## Prioritized Backlog
-### P0 — DONE
-- [x] All bug fixes
-- [x] Game addictiveness (combo, power-ups, particles, levels)
-- [x] Sound effects + fullscreen + achievements
-- [x] Global leaderboard (MongoDB)
-- [x] Social sharing
-- [x] IFG20 discount flow end-to-end
-- [x] Daily Challenge system
-- [x] Product slug deep links
+### P0 — ALL DONE
+- [x] All bug fixes + game addictiveness
+- [x] Sound, fullscreen, achievements, leaderboard, sharing
+- [x] IFG20 discount flow + Resend email delivery
+- [x] Daily Challenge with CHALLENGE25 reward
+- [x] Product catalog sync (13 products)
+- [x] Discount-aware checkout
+- [x] Hostinger Node.js deployment package
 
 ### P1
-- [ ] Sync all frontend products to Supabase (admin bulk import)
-- [ ] SendGrid/email delivery for IFG20 code + free PDF
-- [ ] Push notifications for daily challenge reminders
-- [ ] PayPal checkout discount code validation integration
+- [ ] Custom Resend domain (yourdomain.com instead of resend.dev)
+- [ ] MongoDB Atlas setup for Hostinger production
+- [ ] PayPal webhook for order confirmation emails
+- [ ] PDF generation for the free Caribbean Fruit Guide
 
 ### P2
 - [ ] Seasonal game themes
 - [ ] Multiplayer challenge mode
-- [ ] Referral tracking for game shares
-- [ ] A/B test different discount amounts
+- [ ] Referral system with FRIEND15 code
+- [ ] A/B test discount amounts
