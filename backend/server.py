@@ -824,7 +824,11 @@ async def get_product_by_slug(slug: str):
     """Get a single product by slug (public endpoint)"""
     try:
         products = read_products_from_file()
+        # Exact match first
         product = next((p for p in products if p.get("slug") == slug), None)
+        # Partial match fallback (frontend slugs may differ from Supabase slugs)
+        if not product:
+            product = next((p for p in products if slug.startswith(p.get("slug", "")) or p.get("slug", "").startswith(slug)), None)
         
         if not product:
             raise HTTPException(status_code=404, detail="Product not found")
