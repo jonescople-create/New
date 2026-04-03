@@ -43,15 +43,37 @@ Caribbean fruit e-commerce website with addictive fruit catcher game as a sales 
   - `POST /api/admin/sync-products` → Supabase upsert (13/13 products synced)
 - **Testing**: Iteration 5 — 100% backend (32/32 tests), 95% frontend
 
-### Testing Results
-- Iteration 1: 85% | Iteration 2: 95% | Iteration 3: 95% | Iteration 4: 96.8% backend, 85% frontend | Iteration 5: 100% backend, 95% frontend
+### Session 6 — Referral System + PayPal Confirmation Email (April 3, 2026)
+1. **FRIEND15 Referral System** — `POST /api/referral/generate` creates unique `REF_xxx` link per email. Friends who sign up via link get FRIEND15 (15% off). Mirrors to `/api/referral/validate/{code}`. Subscribe endpoint upgraded to detect referral codes.
+2. **PayPal Purchase Confirmation Email** — `POST /api/pay/confirm` endpoint triggers branded purchase confirmation email via Resend. Also updates `purchases.status` in Supabase.
+3. **ShareScoreModal Referral Section** — Shows FRIEND15 promo text always; shows actual referral link when player email is captured. Calls `/api/referral/generate` automatically.
+4. **Gym-Energy Slug Fixed** — Consistent `gym-energy` + `gym-energy-recipes` dual slug support in both `StoreEbooksPage.tsx` and `ProductDetailPage.tsx`. GymEnergyBookCover SVG now renders correctly in all pages.
+5. **Email HTML Upgraded** — Welcome email now dynamically handles IFG20 vs FRIEND15 with branded referral copy.
 
-## Discount Codes
-| Code | Discount | Trigger | Active |
-|------|----------|---------|--------|
-| IFG20 | 20% off first ebook | Email signup | Yes |
-| FRUIT10 | 10% off recipe pack | Future promo | Yes |
-| CHALLENGE25 | 25% off any ebook | Daily challenge completion | Yes |
+### Discount Code Inventory
+| Code | % | Trigger | Status |
+|------|---|---------|--------|
+| IFG20 | 20% | Email signup | Active |
+| FRIEND15 | 15% | Referral link signup | Active |
+| CHALLENGE25 | 25% | Daily challenge win | Active |
+| FRUIT10 | 10% | General promo | Active |
+
+### Testing Results (All Sessions)
+- Iter 1: 85% | Iter 2: 95% | Iter 3: 95% | Iter 4: 97% | Iter 5: 100% backend, 95% frontend | **Iter 6: 100% backend (23/23), 100% frontend**
+
+## Prioritized Backlog
+### P1 — DONE
+- [x] All bug fixes + game addictiveness
+- [x] MongoDB → Supabase full migration
+- [x] Hostinger deployment package (527KB ZIP)
+- [x] FRIEND15 referral system
+- [x] PayPal capture → purchase confirmation email
+
+### P2 — UPCOMING
+- [ ] Custom Resend sender domain (yourname@islandfruitguide.com)
+- [ ] PDF generation for Caribbean Fruit Guide ebook download
+- [ ] Stripe as PayPal alternative
+- [ ] Referral tracking dashboard in admin panel
 
 ## Supabase Schema (Supabase-only, MongoDB removed)
 - **products**: `id, title, slug, category, price, short_description, cover_image, is_featured, ...`
