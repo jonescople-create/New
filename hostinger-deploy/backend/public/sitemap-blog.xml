@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+
+  <url>
+    <loc>https://www.islandfruitguide.com/blog</loc>
+    <lastmod>2025-06-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
+    <loc>https://www.islandfruitguide.com/blog/soursop-health-benefits-fact-vs-fiction</loc>
+    <lastmod>2025-01-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/fruit-images/fruit-soursop.jpg</image:loc>
+      <image:caption>Soursop health benefits research and fact-checking – IslandFruitGuide</image:caption>
+      <image:title>Soursop Health Benefits: Fact vs. Fiction</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.islandfruitguide.com/blog/7-day-tropical-superfruit-meal-plan</loc>
+    <lastmod>2025-01-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/fruit-images/fruit-papaya.jpg</image:loc>
+      <image:caption>7-Day Tropical Superfruit Meal Plan – IslandFruitGuide</image:caption>
+      <image:title>The 7-Day Tropical Superfruit Meal Plan</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.islandfruitguide.com/blog/classic-jamaican-soursop-juice-recipe</loc>
+    <lastmod>2025-02-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/recipe-images/fruit-soursop-juice.webp</image:loc>
+      <image:caption>Classic Jamaican Soursop Juice recipe – IslandFruitGuide</image:caption>
+      <image:title>Classic Jamaican-Style Soursop Juice Recipe</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.islandfruitguide.com/blog/guava-vitamin-c-powerhouse</loc>
+    <lastmod>2025-02-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/fruit-images/fruit-guava.jpg</image:loc>
+      <image:caption>Guava Vitamin C content comparison – IslandFruitGuide</image:caption>
+      <image:title>Why Guava Has 4x More Vitamin C Than Oranges</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.islandfruitguide.com/blog/coconut-oil-skin-hair-beauty-guide</loc>
+    <lastmod>2025-02-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/fruit-images/fruit-coconut.jpg</image:loc>
+      <image:caption>Coconut Oil for Skin and Hair guide – IslandFruitGuide</image:caption>
+      <image:title>Coconut Oil for Skin and Hair: The Caribbean Beauty Secret</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.islandfruitguide.com/blog/papaya-enzyme-digestion-skincare</loc>
+    <lastmod>2025-03-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/fruit-images/fruit-papaya.jpg</image:loc>
+      <image:caption>Papaya enzyme (papain) for digestion and skincare – IslandFruitGuide</image:caption>
+      <image:title>Papaya's Secret Enzyme: How Papain Transforms Digestion and Skin</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.islandfruitguide.com/blog/how-to-store-tropical-fruits</loc>
+    <lastmod>2025-03-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/fruit-images/fruit-mango.jpg</image:loc>
+      <image:caption>How to store tropical fruits guide – IslandFruitGuide</image:caption>
+      <image:title>The Complete Guide to Storing Tropical Fruits</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.islandfruitguide.com/blog/tamarind-balls-recipe-caribbean-candy</loc>
+    <lastmod>2025-03-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/recipe-images/recipe-tamarind-balls.png</image:loc>
+      <image:caption>Traditional Caribbean Tamarind Balls recipe – IslandFruitGuide</image:caption>
+      <image:title>Traditional Caribbean Tamarind Balls Recipe</image:title>
+    </image:image>
+  </url>
+</urlset>

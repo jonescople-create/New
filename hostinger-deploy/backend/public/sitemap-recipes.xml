@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+
+  <!-- r1: Jamaican Ackee and Saltfish -->
+  <url>
+    <loc>https://www.islandfruitguide.com/recipes/jamaican-ackee-and-saltfish</loc>
+    <lastmod>2025-01-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/recipe-images/recipe-ackee-and-saltfish.jpeg</image:loc>
+      <image:caption>Jamaican Ackee and Saltfish — Jamaica's national dish with creamy ackee and salted codfish – IslandFruitGuide</image:caption>
+      <image:title>Jamaican Ackee and Saltfish Recipe</image:title>
+    </image:image>
+  </url>
+
+  <!-- r2: Tropical Mango Chutney -->
+  <url>
+    <loc>https://www.islandfruitguide.com/recipes/tropical-mango-chutney</loc>
+    <lastmod>2025-01-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/recipe-images/fruit-mango-chutney.webp</image:loc>
+      <image:caption>Tropical Mango Chutney with scotch bonnet — Caribbean condiment recipe – IslandFruitGuide</image:caption>
+      <image:title>Tropical Mango Chutney Recipe</image:title>
+    </image:image>
+  </url>
+
+  <!-- r3: Soursop Juice Caribbean Style -->
+  <url>
+    <loc>https://www.islandfruitguide.com/recipes/soursop-juice-caribbean-style</loc>
+    <lastmod>2025-01-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/recipe-images/fruit-soursop-juice.webp</image:loc>
+      <image:caption>Caribbean Soursop Juice with condensed milk and nutmeg — refreshing tropical drink – IslandFruitGuide</image:caption>
+      <image:title>Caribbean Soursop Juice Recipe</image:title>
+    </image:image>
+  </url>
+
+  <!-- r4: Guava Cheese Paste -->
+  <url>
+    <loc>https://www.islandfruitguide.com/recipes/guava-cheese-paste</loc>
+    <lastmod>2025-01-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/recipe-images/recipe-guava-cheese.png</image:loc>
+      <image:caption>Traditional Caribbean Guava Cheese paste — sweet dense confection – IslandFruitGuide</image:caption>
+      <image:title>Caribbean Guava Cheese (Guava Paste) Recipe</image:title>
+    </image:image>
+  </url>
+
+  <!-- r5: Passion Fruit Mousse -->
+  <url>
+    <loc>https://www.islandfruitguide.com/recipes/passion-fruit-mousse</loc>
+    <lastmod>2025-01-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/recipe-images/recipe-passion-fruit-mousse.png</image:loc>
+      <image:caption>Silky Passion Fruit Mousse dessert — Caribbean-Brazilian fusion – IslandFruitGuide</image:caption>
+      <image:title>Passion Fruit Mousse Recipe</image:title>
+    </image:image>
+  </url>
+
+  <!-- r6: Papaya Smoothie Bowl -->
+  <url>
+    <loc>https://www.islandfruitguide.com/recipes/papaya-smoothie-bowl</loc>
+    <lastmod>2025-01-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/recipe-images/fruit-papaya-smoothie.webp</image:loc>
+      <image:caption>Tropical Papaya Smoothie Bowl with chia seeds and coconut — Caribbean breakfast – IslandFruitGuide</image:caption>
+      <image:title>Papaya Smoothie Bowl Recipe</image:title>
+    </image:image>
+  </url>
+
+  <!-- r7: Tamarind Balls -->
+  <url>
+    <loc>https://www.islandfruitguide.com/recipes/tamarind-balls-caribbean-candy</loc>
+    <lastmod>2025-01-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/recipe-images/recipe-tamarind-balls.png</image:loc>
+      <image:caption>Caribbean Tamarind Balls — sweet sour spicy island candy – IslandFruitGuide</image:caption>
+      <image:title>Caribbean Tamarind Balls Recipe</image:title>
+    </image:image>
+  </url>
+
+  <!-- r8: Caribbean Coconut Drops -->
+  <url>
+    <loc>https://www.islandfruitguide.com/recipes/caribbean-coconut-drops</loc>
+    <lastmod>2025-01-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/recipe-images/fruit-coconut-drops.webp</image:loc>
+      <image:caption>Classic Jamaican Coconut Drops with ginger — traditional Caribbean candy – IslandFruitGuide</image:caption>
+      <image:title>Jamaican Coconut Drops Recipe</image:title>
+    </image:image>
+  </url>
+
+  <!-- r9: Pineapple Upside-Down Rum Cake -->
+  <url>
+    <loc>https://www.islandfruitguide.com/recipes/pineapple-upside-down-rum-cake</loc>
+    <lastmod>2025-08-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/recipe-images/recipe-pineapple-upside-down-rum-cake.png</image:loc>
+      <image:caption>Caribbean Pineapple Upside-Down Rum Cake with coconut milk – IslandFruitGuide</image:caption>
+      <image:title>Pineapple Upside-Down Rum Cake Recipe</image:title>
+    </image:image>
+  </url>
+
+  <!-- r10: June Plum Juice -->
+  <url>
+    <loc>https://www.islandfruitguide.com/recipes/june-plum-juice</loc>
+    <lastmod>2025-01-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/recipe-images/fruit-june-plum-juice.webp</image:loc>
+      <image:caption>Refreshing Caribbean June Plum Juice (Pommecythere) — tropical island drink – IslandFruitGuide</image:caption>
+      <image:title>June Plum Juice Recipe</image:title>
+    </image:image>
+  </url>
+
+  <!-- r11: Green June Plum Drink -->
+  <url>
+    <loc>https://www.islandfruitguide.com/recipes/green-june-plum-drink</loc>
+    <lastmod>2025-01-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/recipe-images/recipe-unripe-juneplum-drink.jpeg</image:loc>
+      <image:caption>Tangy Green June Plum Drink with scotch bonnet — Caribbean street-style beverage – IslandFruitGuide</image:caption>
+      <image:title>Green June Plum Drink Recipe</image:title>
+    </image:image>
+  </url>
+
+  <!-- r12: Starfruit Tropical Salad -->
+  <url>
+    <loc>https://www.islandfruitguide.com/recipes/starfruit-tropical-salad</loc>
+    <lastmod>2025-01-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/recipe-images/fruit-starfruit-dish.webp</image:loc>
+      <image:caption>Starfruit Tropical Salad with mango and lime dressing — Caribbean fresh salad – IslandFruitGuide</image:caption>
+      <image:title>Starfruit Tropical Salad Recipe</image:title>
+    </image:image>
+  </url>
+
+  <!-- r13: Hog Plum Pepper Sauce -->
+  <url>
+    <loc>https://www.islandfruitguide.com/recipes/hog-plum-pepper-sauce</loc>
+    <lastmod>2025-07-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/recipe-images/recipe-hog-plum-pepper-sauce.png</image:loc>
+      <image:caption>Caribbean Hog Plum Pepper Sauce with scotch bonnet — bold island hot sauce – IslandFruitGuide</image:caption>
+      <image:title>Hog Plum Pepper Sauce Recipe</image:title>
+    </image:image>
+  </url>
+
+  <!-- r14: Sweetsop Ice Cream -->
+  <url>
+    <loc>https://www.islandfruitguide.com/recipes/sweetsop-ice-cream</loc>
+    <lastmod>2025-07-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/recipe-images/recipe-sweetsop-icecream.png</image:loc>
+      <image:caption>No-churn Sweetsop Sugar Apple Ice Cream — creamy Caribbean frozen dessert – IslandFruitGuide</image:caption>
+      <image:title>Sweetsop (Sugar Apple) Ice Cream Recipe</image:title>
+    </image:image>
+  </url>
+
+  <!-- r15: Homemade Sea Grape Wine -->
+  <url>
+    <loc>https://www.islandfruitguide.com/recipes/homemade-sea-grape-wine</loc>
+    <lastmod>2025-07-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/recipe-images/recipe-homemade-seagrape-wine%20(1).jpeg</image:loc>
+      <image:caption>Homemade Caribbean Sea Grape Wine — deep ruby fermented coastal fruit wine – IslandFruitGuide</image:caption>
+      <image:title>Homemade Sea Grape Wine Recipe</image:title>
+    </image:image>
+  </url>
+
+  <!-- r16: Jamaican Ackee Porridge Breakfast Spread -->
+  <url>
+    <loc>https://www.islandfruitguide.com/recipes/jamaican-ackee-porridge-breakfast-spread</loc>
+    <lastmod>2025-08-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/recipe-images/recipe-jamaican-ackee-porridge-breakfast-spread.png</image:loc>
+      <image:caption>Jamaican Ackee Porridge breakfast spread with coconut milk and warm spices – IslandFruitGuide</image:caption>
+      <image:title>Jamaican Ackee Porridge Breakfast Spread Recipe</image:title>
+    </image:image>
+  </url>
+
+  <!-- r17: Rose Apple Juice -->
+  <url>
+    <loc>https://www.islandfruitguide.com/recipes/rose-apple-juice</loc>
+    <lastmod>2025-08-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/recipe-images/recipe-roseapple-juice.jpeg</image:loc>
+      <image:caption>Refreshing Rose Apple (Otaheite Apple) juice — light floral Caribbean drink – IslandFruitGuide</image:caption>
+      <image:title>Rose Apple Juice Recipe</image:title>
+    </image:image>
+  </url>
+
+  <!-- r18: Jamaican Banana Porridge -->
+  <url>
+    <loc>https://www.islandfruitguide.com/recipes/jamaican-banana-porridge</loc>
+    <lastmod>2025-08-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/recipe-images/recipe-banana-porridge%20(1).jpeg</image:loc>
+      <image:caption>Creamy Jamaican Banana Porridge with cornmeal and coconut milk – IslandFruitGuide</image:caption>
+      <image:title>Jamaican Banana Porridge Recipe</image:title>
+    </image:image>
+  </url>
+
+  <!-- r19: Papaya-Passion-Guava Elixir -->
+  <url>
+    <loc>https://www.islandfruitguide.com/recipes/papaya-passion-guava-elixir</loc>
+    <lastmod>2026-03-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://customer-assets.emergentagent.com/job_zip-site-clone/artifacts/5pje2lfc_ChatGPT%20Image%20Mar%201%2C%202026%2C%2004_44_55%20PM.png</image:loc>
+      <image:caption>Papaya-Passion-Guava Elixir (Island Trio) — Bright tropical drink with papaya, passion fruit, and guava – IslandFruitGuide</image:caption>
+      <image:title>Papaya-Passion-Guava Elixir Recipe</image:title>
+    </image:image>
+  </url>
+
+  <!-- r20: Lychee Lime Cooler -->
+  <url>
+    <loc>https://www.islandfruitguide.com/recipes/lychee-lime-cooler</loc>
+    <lastmod>2026-03-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/recipe-images/recipe-lychee-lime-cooler.jpeg</image:loc>
+      <image:caption>Lychee Lime Cooler — Light floral tropical drink with fresh lychees and lime – IslandFruitGuide</image:caption>
+      <image:title>Lychee Lime Cooler Recipe</image:title>
+    </image:image>
+  </url>
+
+  <!-- r21: Dragon Fruit Coconut Refresher -->
+  <url>
+    <loc>https://www.islandfruitguide.com/recipes/dragon-fruit-coconut-refresher</loc>
+    <lastmod>2026-03-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/recipe-images/recipe-dragon-fruit-refresher.jpeg</image:loc>
+      <image:caption>Dragon Fruit Coconut Refresher — Smooth vibrant pink tropical smoothie – IslandFruitGuide</image:caption>
+      <image:title>Dragon Fruit Coconut Refresher Recipe</image:title>
+    </image:image>
+  </url>
+
+  <!-- r22: Lychee Dragon Fruit Splash -->
+  <url>
+    <loc>https://www.islandfruitguide.com/recipes/lychee-dragon-fruit-splash</loc>
+    <lastmod>2026-03-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://customer-assets.emergentagent.com/job_zip-site-clone/artifacts/kdy56ah4_ChatGPT%20Image%20Mar%201%2C%202026%2C%2004_54_05%20PM.png</image:loc>
+      <image:caption>Lychee Dragon Fruit Splash — Refreshing jewel-pink tropical recipe with lychee and dragon fruit – IslandFruitGuide</image:caption>
+      <image:title>Lychee Dragon Fruit Splash Recipe</image:title>
+    </image:image>
+  </url>
+
+</urlset>

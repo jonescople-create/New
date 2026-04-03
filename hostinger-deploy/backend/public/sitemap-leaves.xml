@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+
+  <!-- Medicinal Leaves Listing Page -->
+  <url>
+    <loc>https://www.islandfruitguide.com/medicinal-leaves</loc>
+    <lastmod>2025-07-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Soursop Leaf -->
+  <url>
+    <loc>https://www.islandfruitguide.com/medicinal-leaves/soursop-leaf</loc>
+    <lastmod>2025-07-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/fruit-images/fruit-soursop.jpg</image:loc>
+      <image:caption>Soursop (Graviola) leaf — traditional Caribbean herbal knowledge – IslandFruitGuide</image:caption>
+      <image:title>Soursop Leaf (Annona muricata) — Traditional Use Guide</image:title>
+    </image:image>
+  </url>
+
+  <!-- Guava Leaf -->
+  <url>
+    <loc>https://www.islandfruitguide.com/medicinal-leaves/guava-leaf</loc>
+    <lastmod>2025-07-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/fruit-images/fruit-guava.jpg</image:loc>
+      <image:caption>Guava leaf — traditional Caribbean digestive and wellness tea – IslandFruitGuide</image:caption>
+      <image:title>Guava Leaf (Psidium guajava) — Traditional Use Guide</image:title>
+    </image:image>
+  </url>
+
+  <!-- Papaya Leaf -->
+  <url>
+    <loc>https://www.islandfruitguide.com/medicinal-leaves/papaya-leaf</loc>
+    <lastmod>2025-07-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/fruit-images/fruit-papaya.jpg</image:loc>
+      <image:caption>Papaya leaf — traditional Caribbean and tropical folk wellness – IslandFruitGuide</image:caption>
+      <image:title>Papaya Leaf (Carica papaya) — Traditional Use Guide</image:title>
+    </image:image>
+  </url>
+
+  <!-- Mango Leaf -->
+  <url>
+    <loc>https://www.islandfruitguide.com/medicinal-leaves/mango-leaf</loc>
+    <lastmod>2025-07-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/fruit-images/fruit-mango.jpg</image:loc>
+      <image:caption>Mango leaf — traditional Caribbean and Ayurvedic morning infusion – IslandFruitGuide</image:caption>
+      <image:title>Mango Leaf (Mangifera indica) — Traditional Use Guide</image:title>
+    </image:image>
+  </url>
+
+  <!-- Breadfruit Leaf -->
+  <url>
+    <loc>https://www.islandfruitguide.com/medicinal-leaves/breadfruit-leaf</loc>
+    <lastmod>2025-07-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/fruit-images/fruit-breadfruit.jpg</image:loc>
+      <image:caption>Breadfruit leaf — traditional Caribbean circulatory wellness tea – IslandFruitGuide</image:caption>
+      <image:title>Breadfruit Leaf (Artocarpus altilis) — Traditional Use Guide</image:title>
+    </image:image>
+  </url>
+
+  <!-- Passion Fruit Leaf -->
+  <url>
+    <loc>https://www.islandfruitguide.com/medicinal-leaves/passion-fruit-leaf</loc>
+    <lastmod>2025-07-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/fruit-images/fruit-passion-fruit.png</image:loc>
+      <image:caption>Passion fruit leaf (Passiflora) — traditional Caribbean calming tea – IslandFruitGuide</image:caption>
+      <image:title>Passion Fruit Leaf (Passiflora edulis) — Traditional Use Guide</image:title>
+    </image:image>
+  </url>
+
+  <!-- Avocado Leaf -->
+  <url>
+    <loc>https://www.islandfruitguide.com/medicinal-leaves/avocado-leaf</loc>
+    <lastmod>2025-07-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/fruit-images/fruit-avocado.jpeg</image:loc>
+      <image:caption>Avocado leaf — traditional Caribbean and Mexican culinary aromatic – IslandFruitGuide</image:caption>
+      <image:title>Avocado Leaf (Persea americana) — Traditional Use &amp; Culinary Guide</image:title>
+    </image:image>
+  </url>
+
+  <!-- Tamarind Leaf -->
+  <url>
+    <loc>https://www.islandfruitguide.com/medicinal-leaves/tamarind-leaf</loc>
+    <lastmod>2025-07-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/fruit-images/fruits-tamarind.jpg</image:loc>
+      <image:caption>Tamarind leaf — traditional Caribbean and African folk wellness tea – IslandFruitGuide</image:caption>
+      <image:title>Tamarind Leaf (Tamarindus indica) — Traditional Use Guide</image:title>
+    </image:image>
+  </url>
+
+</urlset>

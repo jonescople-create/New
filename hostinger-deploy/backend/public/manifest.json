@@ -1,0 +1,74 @@
+{
+  "name": "IslandFruitGuide — Tropical Fruit Encyclopedia",
+  "short_name": "IslandFruit",
+  "description": "Your complete Caribbean & tropical fruit guide. Recipes, health benefits, fruit game, and ebook store.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#FAFAFA",
+  "theme_color": "#1F7A4D",
+  "orientation": "portrait-primary",
+  "lang": "en",
+  "categories": ["food", "health", "lifestyle", "education"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/brand-assets/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/brand-assets/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/brand-assets/banner-hero.webp",
+      "sizes": "1280x720",
+      "type": "image/webp",
+      "form_factor": "wide",
+      "label": "IslandFruitGuide Homepage"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Fruit Finder",
+      "short_name": "Fruits",
+      "description": "Browse all Caribbean tropical fruits",
+      "url": "/fruits",
+      "icons": [{ "src": "/favicon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Recipes",
+      "short_name": "Recipes",
+      "description": "Caribbean recipe collection",
+      "url": "/recipes",
+      "icons": [{ "src": "/favicon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Fruit Catcher Game",
+      "short_name": "Game",
+      "description": "Play Fruit Catcher and earn rewards",
+      "url": "/fruit-game",
+      "icons": [{ "src": "/favicon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Store",
+      "short_name": "Store",
+      "description": "Caribbean fruit ebooks & recipe packs",
+      "url": "/store",
+      "icons": [{ "src": "/favicon.svg", "sizes": "any" }]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}

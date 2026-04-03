@@ -821,18 +821,11 @@ async def get_products_by_category(category: str):
 
 @app.get("/api/products/{slug}")
 async def get_product_by_slug(slug: str):
-    """Get a single product by slug (public endpoint)"""
+    """Get a single product by slug (public endpoint) — checks MongoDB catalog + Supabase"""
     try:
-        products = read_products_from_file()
-        # Exact match first
-        product = next((p for p in products if p.get("slug") == slug), None)
-        # Partial match fallback (frontend slugs may differ from Supabase slugs)
-        if not product:
-            product = next((p for p in products if slug.startswith(p.get("slug", "")) or p.get("slug", "").startswith(slug)), None)
-        
+        product = await get_product_by_slug_any(slug)
         if not product:
             raise HTTPException(status_code=404, detail="Product not found")
-        
         return product
     except HTTPException:
         raise
@@ -1661,6 +1654,14 @@ async def subscribe_email(subscriber: EmailSubscriber):
         data.pop('_id', None)
         
         logger.info(f"New subscriber: {email} from {subscriber.source}")
+        
+        # Send welcome email with IFG20 code via Resend (async, non-blocking)
+        try:
+            import asyncio
+            await asyncio.to_thread(_send_welcome_email, email)
+        except Exception as email_err:
+            logger.warning(f"Email send failed (non-blocking): {email_err}")
+        
         return {
             "status": "subscribed",
             "email": email,
@@ -2065,6 +2066,184 @@ def get_config():
         "paypal_mode": PAYPAL_MODE,
         "currency": "USD"
     }
+
+
+# ==================== Resend Email Delivery ====================
+
+import resend
+
+RESEND_API_KEY = os.environ.get('RESEND_API_KEY', '')
+SENDER_EMAIL = os.environ.get('SENDER_EMAIL', 'onboarding@resend.dev')
+
+if RESEND_API_KEY:
+    resend.api_key = RESEND_API_KEY
+    logger.info("Resend email configured")
+
+def _send_welcome_email(to_email: str):
+    """Send welcome email with IFG20 discount code (sync, called via to_thread)"""
+    if not RESEND_API_KEY:
+        logger.warning("No RESEND_API_KEY — skipping email")
+        return
+    
+    html = f"""
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#f9f9f9;padding:0;">
+      <div style="background:linear-gradient(135deg,#1F7A4D,#0A2010);padding:32px 24px;text-align:center;">
+        <h1 style="color:#F9A825;font-size:28px;margin:0;">Welcome to IslandFruitGuide!</h1>
+        <p style="color:#ffffffcc;font-size:14px;margin-top:8px;">Your Caribbean fruit journey starts here</p>
+      </div>
+      <div style="background:#ffffff;padding:32px 24px;">
+        <p style="color:#333;font-size:16px;line-height:1.6;">
+          Thank you for joining! Here's your exclusive discount:
+        </p>
+        <div style="background:#FFF8E1;border:2px dashed #F9A825;border-radius:12px;padding:24px;text-align:center;margin:24px 0;">
+          <p style="color:#666;font-size:12px;text-transform:uppercase;letter-spacing:2px;margin:0 0 8px;">Your Discount Code</p>
+          <p style="color:#1F7A4D;font-size:36px;font-weight:900;letter-spacing:4px;margin:0;">IFG20</p>
+          <p style="color:#333;font-size:14px;margin-top:8px;font-weight:bold;">20% off your first ebook purchase</p>
+        </div>
+        <p style="color:#333;font-size:14px;line-height:1.6;">
+          <strong>Your FREE Caribbean Fruit Guide</strong> is attached below with profiles of 10 tropical fruits, health benefits, and quick recipes.
+        </p>
+        <div style="text-align:center;margin:24px 0;">
+          <a href="https://islandfruitguide.com/store" style="display:inline-block;background:#1F7A4D;color:#fff;font-weight:bold;text-decoration:none;padding:14px 32px;border-radius:8px;font-size:16px;">
+            Browse Our Store &rarr;
+          </a>
+        </div>
+        <hr style="border:none;border-top:1px solid #eee;margin:24px 0;">
+        <p style="color:#999;font-size:11px;text-align:center;">
+          IslandFruitGuide.com &bull; Caribbean Fruits, Recipes & Digital Guides<br>
+          Unsubscribe anytime by replying to this email.
+        </p>
+      </div>
+    </div>
+    """
+    
+    try:
+        result = resend.Emails.send({
+            "from": SENDER_EMAIL,
+            "to": [to_email],
+            "subject": "Welcome! Your 20% OFF Code: IFG20 + Free Fruit Guide",
+            "html": html,
+        })
+        logger.info(f"Welcome email sent to {to_email}: {result}")
+        return result
+    except Exception as e:
+        logger.error(f"Resend email error: {e}")
+        raise
+
+
+# ==================== Product Sync to Supabase ====================
+
+@app.post("/api/admin/sync-products")
+async def sync_products_to_supabase(payload: dict = Depends(verify_token)):
+    """Sync all frontend products to MongoDB (accessible by all APIs)"""
+    PRODUCTS = [
+        {"slug": "tropical-juice-smoothie-recipes", "title": "Tropical Juice & Smoothie Recipes", "price": 9.99, "original_price": 14.99, "category": "recipe-pack", "short_description": "50 Caribbean-inspired smoothie and juice recipes with nutrition breakdowns.", "cover_image": "https://images.unsplash.com/photo-1622597467836-f3285f2131b8?w=400", "is_featured": False},
+        {"slug": "caribbean-fruit-guide", "title": "Caribbean Fruit Encyclopedia", "price": 14.99, "original_price": 24.99, "category": "ebook", "short_description": "The complete guide to 100+ Caribbean fruits — history, nutrition, and growing tips.", "cover_image": "https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=400", "is_featured": True},
+        {"slug": "fat-loss-smoothies", "title": "Caribbean Smoothies for Fat Loss", "price": 12.99, "original_price": 19.99, "category": "recipe-pack", "short_description": "30 calorie-counted tropical smoothie recipes designed for sustainable weight loss.", "cover_image": "https://images.unsplash.com/photo-1638176066666-ffb2f013c7dd?w=400", "is_featured": True},
+        {"slug": "healing-drinks", "title": "Tropical Superfruit Healing Drinks", "price": 11.99, "original_price": 17.99, "category": "recipe-pack", "short_description": "40 traditional Caribbean healing tonics and herbal drink recipes.", "cover_image": "https://images.unsplash.com/photo-1610970881699-44a5587cabec?w=400", "is_featured": False},
+        {"slug": "pre-workout-drinks", "title": "Island Pre-Workout Natural Fuel", "price": 10.99, "original_price": 15.99, "category": "recipe-pack", "short_description": "25 fruit-based pre-workout energy drinks — no synthetic supplements.", "cover_image": "https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=400", "is_featured": False},
+        {"slug": "mango-recipe-pack", "title": "Mango Recipe Collection", "price": 7.99, "original_price": 11.99, "category": "recipe-pack", "short_description": "15 creative mango recipes — from breakfast to dessert.", "cover_image": "https://images.unsplash.com/photo-1553279768-865429fa0078?w=400", "is_featured": False},
+        {"slug": "coconut-recipe-pack", "title": "Coconut Recipe Collection", "price": 7.99, "original_price": 11.99, "category": "recipe-pack", "short_description": "20 versatile coconut recipes using water, milk, oil, and flesh.", "cover_image": "https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=400", "is_featured": False},
+        {"slug": "medicinal-leaves-guide", "title": "Caribbean Medicinal Leaves Guide", "price": 13.99, "original_price": 21.99, "category": "ebook", "short_description": "50 medicinal plants of the Caribbean with preparation methods.", "cover_image": "https://images.unsplash.com/photo-1515694346937-94d85e39f29a?w=400", "is_featured": True},
+        {"slug": "papaya-recipe-pack", "title": "Papaya Recipe Collection", "price": 6.99, "original_price": 9.99, "category": "recipe-pack", "short_description": "12 refreshing papaya recipes for every meal of the day.", "cover_image": "https://images.unsplash.com/photo-1517282009859-f000ec3b26fe?w=400", "is_featured": False},
+        {"slug": "pineapple-recipe-pack", "title": "Pineapple Recipe Collection", "price": 7.99, "original_price": 11.99, "category": "recipe-pack", "short_description": "18 tropical pineapple recipes — drinks, desserts, and marinades.", "cover_image": "https://images.unsplash.com/photo-1550258987-190a2d41a8ba?w=400", "is_featured": False},
+        {"slug": "soursop-recipe-pack", "title": "Soursop Recipe Collection", "price": 7.99, "original_price": 11.99, "category": "recipe-pack", "short_description": "10 soursop recipes including the famous Caribbean soursop juice.", "cover_image": "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=400", "is_featured": False},
+        {"slug": "gym-energy", "title": "Tropical Gym Energy Recipes", "price": 14.99, "original_price": 22.99, "category": "recipe-pack", "short_description": "50+ gym-focused energy recipes using tropical fruits.", "cover_image": "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400", "is_featured": True},
+        {"slug": "smoothie-recipes", "title": "Island Smoothie Collection", "price": 8.99, "original_price": 13.99, "category": "recipe-pack", "short_description": "30 island-inspired smoothie recipes for every occasion.", "cover_image": "https://images.unsplash.com/photo-1505252585461-04db1eb84625?w=400", "is_featured": False},
+    ]
+    
+    synced = 0
+    for prod in PRODUCTS:
+        prod['synced_at'] = datetime.utcnow().isoformat()
+        await mongo_db.products_catalog.update_one(
+            {"slug": prod['slug']},
+            {"$set": prod},
+            upsert=True
+        )
+        synced += 1
+    
+    return {"synced": synced, "total": len(PRODUCTS), "source": "mongodb"}
+
+
+# Product lookup helper — checks MongoDB catalog then Supabase
+async def get_product_by_slug_any(slug: str):
+    """Get product from MongoDB catalog (full 13) or Supabase (legacy 4)"""
+    # Try MongoDB first (has all 13)
+    doc = await mongo_db.products_catalog.find_one({"slug": slug}, {"_id": 0})
+    if doc:
+        return doc
+    # Partial match in MongoDB
+    doc = await mongo_db.products_catalog.find_one(
+        {"slug": {"$regex": f"^{slug[:6]}"}},
+        {"_id": 0}
+    )
+    if doc:
+        return doc
+    # Fall back to Supabase
+    try:
+        products = read_products_from_file()
+        p = next((p for p in products if p.get("slug") == slug or slug.startswith(p.get("slug", "")) or p.get("slug", "").startswith(slug)), None)
+        return p
+    except:
+        return None
+
+
+# ==================== Discount-aware PayPal ====================
+
+@app.post("/api/checkout/create-order")
+async def create_discounted_order(request: Request):
+    """Create a PayPal order with optional discount code"""
+    try:
+        body = await request.json()
+        product_slug = body.get('productSlug', '')
+        email = body.get('email', '')
+        discount_code = body.get('discountCode', '').strip().upper()
+        
+        if not product_slug or not email:
+            raise HTTPException(status_code=400, detail="productSlug and email required")
+        
+        # Get product price
+        product = await get_product_by_slug_any(product_slug)
+        if not product:
+            raise HTTPException(status_code=404, detail="Product not found")
+        original_price = float(product['price'])
+        
+        # Apply discount if valid
+        discount_pct = 0
+        if discount_code and discount_code in DISCOUNT_CODES and DISCOUNT_CODES[discount_code]['active']:
+            discount_pct = DISCOUNT_CODES[discount_code]['discount_pct']
+        
+        final_price = round(original_price * (1 - discount_pct / 100), 2)
+        
+        # Record the order intent
+        order_data = {
+            'email': email.lower(),
+            'product_slug': product_slug,
+            'product_title': product['title'],
+            'original_price': original_price,
+            'discount_code': discount_code or None,
+            'discount_pct': discount_pct,
+            'final_price': final_price,
+            'status': 'pending',
+            'created_at': datetime.utcnow().isoformat(),
+        }
+        result = await mongo_db.orders.insert_one(order_data)
+        order_id = str(result.inserted_id)
+        
+        return {
+            "order_id": order_id,
+            "product": product['title'],
+            "original_price": original_price,
+            "discount_code": discount_code or None,
+            "discount_pct": discount_pct,
+            "final_price": final_price,
+            "savings": round(original_price - final_price, 2),
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error creating order: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 if __name__ == "__main__":
