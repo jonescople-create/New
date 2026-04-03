@@ -1,48 +1,21 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { DesktopProvider, useDesktop } from "@/contexts/DesktopContext";
 import { Toaster } from "sonner";
-import LoginPage from "@/pages/LoginPage";
+import LockScreen from "@/pages/LockScreen";
 import Desktop from "@/pages/Desktop";
 import "@/App.css";
 
-function ProtectedRoute({ children }) {
-  const { user, loading } = useAuth();
-  if (loading) {
-    return (
-      <div className="loading-screen" data-testid="loading-screen">
-        <div className="loading-spinner" />
-        <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13 }}>Loading AuraOS...</span>
-      </div>
-    );
-  }
-  if (!user) return <Navigate to="/login" replace />;
-  return children;
-}
-
-function PublicRoute({ children }) {
-  const { user, loading } = useAuth();
-  if (loading) {
-    return (
-      <div className="loading-screen" data-testid="loading-screen">
-        <div className="loading-spinner" />
-      </div>
-    );
-  }
-  if (user) return <Navigate to="/" replace />;
-  return children;
+function Shell() {
+  const { unlocked } = useDesktop();
+  if (!unlocked) return <LockScreen />;
+  return <Desktop />;
 }
 
 function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
-          <Route path="/*" element={<ProtectedRoute><Desktop /></ProtectedRoute>} />
-        </Routes>
-      </BrowserRouter>
+    <DesktopProvider>
+      <Shell />
       <Toaster position="top-center" theme="dark" />
-    </AuthProvider>
+    </DesktopProvider>
   );
 }
 

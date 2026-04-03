@@ -20,8 +20,7 @@ export default function FileExplorer() {
     setLoading(true);
     try {
       const { data } = await axios.get(`${API}/files/browse`, {
-        params: { path },
-        withCredentials: true
+        params: { path }
       });
       setEntries(data.entries || []);
       setCurrentPath(data.path);

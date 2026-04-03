@@ -216,8 +216,7 @@ async def update_settings(settings: SettingsInput, request: Request):
 
 # System info
 @api_router.get("/system/info")
-async def get_system_info(request: Request):
-    await get_current_user(request)
+async def get_system_info():
     cpu_percent = psutil.cpu_percent(interval=0.1)
     memory = psutil.virtual_memory()
     disk = psutil.disk_usage('/')
@@ -229,8 +228,7 @@ async def get_system_info(request: Request):
 
 
 @api_router.get("/system/processes")
-async def get_processes(request: Request):
-    await get_current_user(request)
+async def get_processes():
     processes = []
     for proc in psutil.process_iter(['pid', 'name', 'cpu_percent', 'memory_percent']):
         try:
@@ -283,8 +281,7 @@ VIRTUAL_FS = {
 
 
 @api_router.get("/files/browse")
-async def browse_files(request: Request, path: str = "/"):
-    await get_current_user(request)
+async def browse_files(path: str = "/"):
     items = VIRTUAL_FS.get(path, [])
     entries = []
     for item in items:
@@ -309,8 +306,7 @@ WALLPAPERS = [
 
 
 @api_router.get("/wallpapers")
-async def get_wallpapers(request: Request):
-    await get_current_user(request)
+async def get_wallpapers():
     return WALLPAPERS
 
 

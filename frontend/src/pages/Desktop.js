@@ -1,5 +1,5 @@
 import { WindowProvider, useWindows } from "@/contexts/WindowContext";
-import { useAuth } from "@/contexts/AuthContext";
+import { useDesktop } from "@/contexts/DesktopContext";
 import TopBar from "@/components/desktop/TopBar";
 import Dock from "@/components/desktop/Dock";
 import Window from "@/components/desktop/Window";
@@ -16,14 +16,14 @@ const WALLPAPERS = [
 ];
 
 function DesktopShell() {
-  const { windows, openWindow } = useWindows();
-  const { user } = useAuth();
+  const { windows, openWindow, closeWindow, minimizeWindow } = useWindows();
+  const { settings, addNotification } = useDesktop();
   const [showControlPanel, setShowControlPanel] = useState(false);
   const [showDashboard, setShowDashboard] = useState(false);
 
-  const wallpaperIndex = user?.settings?.wallpaper_index || 0;
-  const wallpaperUrl = WALLPAPERS[wallpaperIndex] || WALLPAPERS[0];
+  const wallpaperUrl = WALLPAPERS[settings.wallpaper_index] || WALLPAPERS[0];
 
+  // Hot corner detection
   useEffect(() => {
     const handleMouseMove = (e) => {
       if (e.clientX <= 2 && e.clientY >= window.innerHeight - 2) {
@@ -33,6 +33,38 @@ function DesktopShell() {
     window.addEventListener("mousemove", handleMouseMove);
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      const ctrl = e.ctrlKey || e.metaKey;
+      if (ctrl && e.key === "w") {
+        e.preventDefault();
+        if (windows.length > 0) {
+          const focused = windows.reduce((a, b) => (a.zIndex > b.zIndex ? a : b));
+          if (focused && !focused.minimized) {
+            closeWindow(focused.id);
+            addNotification(`Closed ${focused.title}`);
+          }
+        }
+      }
+      if (ctrl && e.key === "m") {
+        e.preventDefault();
+        if (windows.length > 0) {
+          const focused = windows.reduce((a, b) => (a.zIndex > b.zIndex ? a : b));
+          if (focused && !focused.minimized) {
+            minimizeWindow(focused.id);
+          }
+        }
+      }
+      if (e.key === "Escape") {
+        setShowDashboard(false);
+        setShowControlPanel(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [windows, closeWindow, minimizeWindow, addNotification]);
 
   const handleDashboardAppClick = useCallback((appId) => {
     openWindow(appId);
@@ -45,16 +77,17 @@ function DesktopShell() {
     <div className="desktop-shell" data-testid="desktop-shell">
       {/* Cosmic Background */}
       <div className="cosmic-bg">
-        <div
-          className="cosmic-bg-image"
-          style={{ backgroundImage: `url(${wallpaperUrl})` }}
-          data-testid="desktop-wallpaper"
-        />
+        <div className="cosmic-bg-image" style={{ backgroundImage: `url(${wallpaperUrl})` }} data-testid="desktop-wallpaper" />
         <div className="cosmic-bg-overlay" />
+        <div className="cosmic-stars" />
         <div className="cosmic-orb cosmic-orb-1" />
         <div className="cosmic-orb cosmic-orb-2" />
         <div className="cosmic-orb cosmic-orb-3" />
         <div className="cosmic-orb cosmic-orb-4" />
+        <div className="cosmic-orb cosmic-orb-5" />
+        <div className="cosmic-orb cosmic-orb-6" />
+        <div className="cosmic-flare cosmic-flare-1" />
+        <div className="cosmic-flare cosmic-flare-2" />
       </div>
 
       {/* Centered Logo */}

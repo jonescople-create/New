@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useDesktop } from "@/contexts/DesktopContext";
 import { Wifi, Bluetooth, Volume2, Bell, ChevronDown } from "lucide-react";
 
 const LOGO_URL = "https://customer-assets.emergentagent.com/job_glow-workspace/artifacts/2wqrcvq7_AURA%20LOGO.png";
 
 export default function TopBar({ onToggleControlPanel }) {
-  const { user } = useAuth();
+  const { notifications } = useDesktop();
   const [time, setTime] = useState(new Date());
+
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   useEffect(() => {
     const interval = setInterval(() => setTime(new Date()), 30000);
@@ -34,8 +36,15 @@ export default function TopBar({ onToggleControlPanel }) {
           className="top-bar-icon"
           onClick={onToggleControlPanel}
           data-testid="top-bar-control-panel-toggle"
+          style={{ position: 'relative' }}
         >
           <Bell size={15} />
+          {unreadCount > 0 && (
+            <span style={{
+              position: 'absolute', top: 2, right: 2, width: 8, height: 8,
+              borderRadius: '50%', background: '#FF0055'
+            }} data-testid="top-bar-notification-badge" />
+          )}
         </div>
         <div
           className="top-bar-icon"
@@ -46,7 +55,6 @@ export default function TopBar({ onToggleControlPanel }) {
           onClick={onToggleControlPanel}
           data-testid="top-bar-user"
         >
-          <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)' }}>{user?.name || 'User'}</span>
           <ChevronDown size={12} />
         </div>
       </div>

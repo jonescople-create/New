@@ -1,7 +1,7 @@
 import { useRef, useCallback, useEffect, useState } from "react";
 import { motion, useDragControls, useMotionValue } from "framer-motion";
-import { useWindows } from "@/contexts/WindowContext";
-import { useAuth } from "@/contexts/AuthContext";
+import { useWindows, APP_CONFIGS } from "@/contexts/WindowContext";
+import { useDesktop } from "@/contexts/DesktopContext";
 import { X, Minus, Maximize2 } from "lucide-react";
 import SettingsApp from "@/components/apps/SettingsApp";
 import FileExplorer from "@/components/apps/FileExplorer";
@@ -20,17 +20,19 @@ const APP_COMPONENTS = {
 };
 
 export default function Window({ windowData }) {
-  const { closeWindow, focusWindow, minimizeWindow, maximizeWindow, updateWindowPosition } = useWindows();
-  const { user } = useAuth();
+  const { closeWindow, focusWindow, minimizeWindow, maximizeWindow, updateWindowPosition, updateWindowSize } = useWindows();
+  const { settings } = useDesktop();
   const dragControls = useDragControls();
   const x = useMotionValue(windowData.x);
   const y = useMotionValue(windowData.y);
-  const constraintRef = useRef(null);
-  const [auraActive, setAuraActive] = useState(true);
+  const [isResizing, setIsResizing] = useState(false);
+  const resizeRef = useRef({ x: 0, y: 0, w: 0, h: 0 });
 
-  const accentColor = user?.settings?.accent_color || "#9D4CDD";
-  const auraIntensity = user?.settings?.aura_intensity ?? 0.5;
-  const systemWideAura = user?.settings?.system_wide_aura !== false;
+  const accentColor = settings.accent_color || "#9D4CDD";
+  const auraIntensity = settings.aura_intensity ?? 0.5;
+  const systemWideAura = settings.system_wide_aura !== false;
+
+  const config = APP_CONFIGS[windowData.appId] || { minWidth: 300, minHeight: 200 };
 
   useEffect(() => {
     if (windowData.maximized) {
@@ -43,15 +45,38 @@ export default function Window({ windowData }) {
     updateWindowPosition(windowData.id, x.get(), y.get());
   }, [windowData.id, updateWindowPosition, x, y]);
 
-  const AppComponent = APP_COMPONENTS[windowData.appId];
+  // Resize logic
+  const startResize = useCallback((e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setIsResizing(true);
+    resizeRef.current = { x: e.clientX, y: e.clientY, w: windowData.width, h: windowData.height };
+  }, [windowData.width, windowData.height]);
 
+  useEffect(() => {
+    if (!isResizing) return;
+    const handleMove = (e) => {
+      const dx = e.clientX - resizeRef.current.x;
+      const dy = e.clientY - resizeRef.current.y;
+      const newW = Math.max(config.minWidth || 300, resizeRef.current.w + dx);
+      const newH = Math.max(config.minHeight || 200, resizeRef.current.h + dy);
+      updateWindowSize(windowData.id, newW, newH);
+    };
+    const handleUp = () => setIsResizing(false);
+    window.addEventListener("mousemove", handleMove);
+    window.addEventListener("mouseup", handleUp);
+    return () => {
+      window.removeEventListener("mousemove", handleMove);
+      window.removeEventListener("mouseup", handleUp);
+    };
+  }, [isResizing, windowData.id, updateWindowSize, config.minWidth, config.minHeight]);
+
+  const AppComponent = APP_COMPONENTS[windowData.appId];
   const auraColorRgba = hexToRgba(accentColor, auraIntensity * 0.3);
-  const auraColorRgba2 = hexToRgba(accentColor, auraIntensity * 0.15);
 
   return (
     <motion.div
-      ref={constraintRef}
-      drag={!windowData.maximized}
+      drag={!windowData.maximized && !isResizing}
       dragControls={dragControls}
       dragListener={false}
       dragMomentum={true}
@@ -71,36 +96,18 @@ export default function Window({ windowData }) {
       transition={{ type: "spring", stiffness: 400, damping: 30 }}
       onDragEnd={handleDragEnd}
       onMouseDown={() => focusWindow(windowData.id)}
-      className={`window-frame ${systemWideAura && auraActive ? "aura-pulse" : ""} ${windowData.maximized ? "window-maximized" : ""}`}
+      className={`window-frame ${systemWideAura ? "aura-pulse" : ""} ${windowData.maximized ? "window-maximized" : ""}`}
       data-testid={`window-${windowData.appId}`}
     >
       <div
         className="window-titlebar"
-        onPointerDown={(e) => { if (!windowData.maximized) dragControls.start(e); }}
+        onPointerDown={(e) => { if (!windowData.maximized && !isResizing) dragControls.start(e); }}
         data-testid={`window-titlebar-${windowData.appId}`}
       >
         <div className="window-traffic-lights">
-          <div
-            className="window-traffic-light close"
-            onClick={(e) => { e.stopPropagation(); closeWindow(windowData.id); }}
-            data-testid={`window-close-${windowData.appId}`}
-          >
-            <X size={8} />
-          </div>
-          <div
-            className="window-traffic-light minimize"
-            onClick={(e) => { e.stopPropagation(); minimizeWindow(windowData.id); }}
-            data-testid={`window-minimize-${windowData.appId}`}
-          >
-            <Minus size={8} />
-          </div>
-          <div
-            className="window-traffic-light maximize"
-            onClick={(e) => { e.stopPropagation(); maximizeWindow(windowData.id); }}
-            data-testid={`window-maximize-${windowData.appId}`}
-          >
-            <Maximize2 size={8} />
-          </div>
+          <div className="window-traffic-light close" onClick={(e) => { e.stopPropagation(); closeWindow(windowData.id); }} data-testid={`window-close-${windowData.appId}`}><X size={8} /></div>
+          <div className="window-traffic-light minimize" onClick={(e) => { e.stopPropagation(); minimizeWindow(windowData.id); }} data-testid={`window-minimize-${windowData.appId}`}><Minus size={8} /></div>
+          <div className="window-traffic-light maximize" onClick={(e) => { e.stopPropagation(); maximizeWindow(windowData.id); }} data-testid={`window-maximize-${windowData.appId}`}><Maximize2 size={8} /></div>
         </div>
         <div className="window-title">{windowData.title}</div>
         <div style={{ width: 60 }} />
@@ -108,6 +115,10 @@ export default function Window({ windowData }) {
       <div className="window-content">
         {AppComponent && <AppComponent />}
       </div>
+      {/* Resize handle */}
+      {!windowData.maximized && (
+        <div className="window-resize-handle" onMouseDown={startResize} data-testid={`window-resize-${windowData.appId}`} />
+      )}
     </motion.div>
   );
 }

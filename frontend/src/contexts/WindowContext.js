@@ -64,8 +64,12 @@ export function WindowProvider({ children }) {
     setWindows(prev => prev.map(w => w.id === id ? { ...w, x, y } : w));
   }, []);
 
+  const updateWindowSize = useCallback((id, width, height) => {
+    setWindows(prev => prev.map(w => w.id === id ? { ...w, width, height } : w));
+  }, []);
+
   return (
-    <WindowContext.Provider value={{ windows, openWindow, closeWindow, focusWindow, minimizeWindow, maximizeWindow, updateWindowPosition }}>
+    <WindowContext.Provider value={{ windows, openWindow, closeWindow, focusWindow, minimizeWindow, maximizeWindow, updateWindowPosition, updateWindowSize }}>
       {children}
     </WindowContext.Provider>
   );

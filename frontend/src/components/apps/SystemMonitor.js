@@ -44,8 +44,8 @@ export default function SystemMonitor() {
   const fetchData = useCallback(async () => {
     try {
       const [infoRes, procRes] = await Promise.all([
-        axios.get(`${API}/system/info`, { withCredentials: true }),
-        axios.get(`${API}/system/processes`, { withCredentials: true }),
+        axios.get(`${API}/system/info`),
+        axios.get(`${API}/system/processes`),
       ]);
       setSysInfo(infoRes.data);
       setProcesses(procRes.data);
