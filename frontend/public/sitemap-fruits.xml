@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+
+  <url>
+    <loc>https://www.islandfruitguide.com/fruits/ackee</loc>
+    <lastmod>2025-06-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/fruit-images/fruit-ackee.jpg</image:loc>
+      <image:caption>Fresh Ackee tropical fruit – IslandFruitGuide</image:caption>
+      <image:title>Ackee (Blighia sapida) – Jamaica's national fruit</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.islandfruitguide.com/fruits/breadfruit</loc>
+    <lastmod>2025-06-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/fruit-images/fruit-breadfruit.jpg</image:loc>
+      <image:caption>Fresh Breadfruit tropical fruit – IslandFruitGuide</image:caption>
+      <image:title>Breadfruit (Artocarpus altilis) – Caribbean staple food</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.islandfruitguide.com/fruits/soursop</loc>
+    <lastmod>2025-06-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/fruit-images/fruit-soursop.jpg</image:loc>
+      <image:caption>Fresh Soursop (Graviola) tropical fruit – IslandFruitGuide</image:caption>
+      <image:title>Soursop (Annona muricata) – nature's green powerhouse</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.islandfruitguide.com/fruits/guinep</loc>
+    <lastmod>2025-06-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/fruit-images/fruit-guinep.jpg</image:loc>
+      <image:caption>Fresh Guinep (Spanish lime) tropical fruit – IslandFruitGuide</image:caption>
+      <image:title>Guinep (Melicoccus bijugatus) – Caribbean summer favorite</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.islandfruitguide.com/fruits/mango</loc>
+    <lastmod>2025-06-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/fruit-images/fruit-mango.jpg</image:loc>
+      <image:caption>Fresh Mango tropical fruit – IslandFruitGuide</image:caption>
+      <image:title>Mango (Mangifera indica) – the king of tropical fruits</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.islandfruitguide.com/fruits/passion-fruit</loc>
+    <lastmod>2025-06-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/fruit-images/fruit-passion-fruit.png</image:loc>
+      <image:caption>Fresh Passion Fruit tropical fruit – IslandFruitGuide</image:caption>
+      <image:title>Passion Fruit (Passiflora edulis) – Caribbean aromatic gem</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.islandfruitguide.com/fruits/star-apple</loc>
+    <lastmod>2025-06-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/fruit-images/fruit-star-apple.jpg</image:loc>
+      <image:caption>Fresh Star Apple (Caimito) tropical fruit – IslandFruitGuide</image:caption>
+      <image:title>Star Apple (Chrysophyllum cainito) – Caribbean custard fruit</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.islandfruitguide.com/fruits/papaya</loc>
+    <lastmod>2025-06-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/fruit-images/fruit-papaya.jpg</image:loc>
+      <image:caption>Fresh Papaya (Pawpaw) tropical fruit – IslandFruitGuide</image:caption>
+      <image:title>Papaya (Carica papaya) – enzyme-rich superfruit</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.islandfruitguide.com/fruits/naseberry</loc>
+    <lastmod>2025-06-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/fruit-images/fruit-naseberry.jpg</image:loc>
+      <image:caption>Fresh Naseberry (Sapodilla) tropical fruit – IslandFruitGuide</image:caption>
+      <image:title>Naseberry (Manilkara zapota) – world's sweetest fruit</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.islandfruitguide.com/fruits/guava</loc>
+    <lastmod>2025-06-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/fruit-images/fruit-guava.jpg</image:loc>
+      <image:caption>Fresh Guava tropical fruit – IslandFruitGuide</image:caption>
+      <image:title>Guava (Psidium guajava) – vitamin C powerhouse</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.islandfruitguide.com/fruits/coconut</loc>
+    <lastmod>2025-06-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/fruit-images/fruit-coconut.jpg</image:loc>
+      <image:caption>Fresh Coconut tropical fruit – IslandFruitGuide</image:caption>
+      <image:title>Coconut (Cocos nucifera) – the tree of life</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.islandfruitguide.com/fruits/tamarind</loc>
+    <lastmod>2025-06-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/fruit-images/fruits-tamarind.jpg</image:loc>
+      <image:caption>Fresh Tamarind tropical fruit – IslandFruitGuide</image:caption>
+      <image:title>Tamarind (Tamarindus indica) – tangy Caribbean staple</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.islandfruitguide.com/fruits/banana</loc>
+    <lastmod>2025-06-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/fruit-images/fruit-banana.jpg</image:loc>
+      <image:caption>Fresh Banana tropical fruit – IslandFruitGuide</image:caption>
+      <image:title>Banana (Musa acuminata) – Caribbean essential</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.islandfruitguide.com/fruits/malay-apple</loc>
+    <lastmod>2025-06-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/fruit-images/fruit-malay-apple.jpg</image:loc>
+      <image:caption>Fresh Malay Apple tropical fruit – IslandFruitGuide</image:caption>
+      <image:title>Malay Apple (Syzygium malaccense) – Otaheite apple</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.islandfruitguide.com/fruits/june-plum</loc>
+    <lastmod>2025-06-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/fruit-images/fruit-june-plum.jpeg</image:loc>
+      <image:caption>Fresh June Plum (Golden Apple) tropical fruit – IslandFruitGuide</image:caption>
+      <image:title>June Plum (Spondias dulcis) – tangy Caribbean favorite</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.islandfruitguide.com/fruits/custard-apple</loc>
+    <lastmod>2025-06-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/fruit-images/fruit-custard-apple.png</image:loc>
+      <image:caption>Fresh Custard Apple tropical fruit – IslandFruitGuide</image:caption>
+      <image:title>Custard Apple (Annona reticulata) – bullock's heart</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.islandfruitguide.com/fruits/hog-plum</loc>
+    <lastmod>2025-06-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/fruit-images/fruit-hogplum.jpg</image:loc>
+      <image:caption>Fresh Hog Plum (Yellow Mombin) tropical fruit – IslandFruitGuide</image:caption>
+      <image:title>Hog Plum (Spondias mombin) – wild Caribbean fruit</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.islandfruitguide.com/fruits/dragon-fruit</loc>
+    <lastmod>2025-06-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/fruit-images/fruit-dragonfruit.png</image:loc>
+      <image:caption>Fresh Dragon Fruit (Pitaya) tropical fruit – IslandFruitGuide</image:caption>
+      <image:title>Dragon Fruit (Hylocereus undatus) – exotic cactus fruit</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.islandfruitguide.com/fruits/avocado</loc>
+    <lastmod>2025-06-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/fruit-images/fruit-avocado.jpeg</image:loc>
+      <image:caption>Fresh Avocado (Caribbean Pear) tropical fruit – IslandFruitGuide</image:caption>
+      <image:title>Avocado (Persea americana) – nutrient-dense superfruit</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.islandfruitguide.com/fruits/sweetsop</loc>
+    <lastmod>2025-06-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/fruit-images/fruit-sweetsop-apple.jpeg</image:loc>
+      <image:caption>Fresh Sweetsop (Sugar Apple) tropical fruit – IslandFruitGuide</image:caption>
+      <image:title>Sweetsop (Annona squamosa) – custard-sweet Caribbean treat</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.islandfruitguide.com/fruits/sea-grape</loc>
+    <lastmod>2025-06-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/fruit-images/fruits-seagrape.jpeg</image:loc>
+      <image:caption>Fresh Sea Grape coastal Caribbean fruit – IslandFruitGuide</image:caption>
+      <image:title>Sea Grape (Coccoloba uvifera) – Caribbean coastal fruit</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.islandfruitguide.com/fruits/pineapple</loc>
+    <lastmod>2025-08-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/fruit-images/fruits-pineapple.png</image:loc>
+      <image:caption>Fresh Pineapple tropical fruit – IslandFruitGuide</image:caption>
+      <image:title>Pineapple (Ananas comosus) – Caribbean sweet-tart fruit</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.islandfruitguide.com/fruits/jackfruit</loc>
+    <lastmod>2025-08-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/fruit-images/fruit-jackfruit.jpeg</image:loc>
+      <image:caption>Fresh Jackfruit tropical fruit – IslandFruitGuide</image:caption>
+      <image:title>Jackfruit (Artocarpus heterophyllus) – largest tree-borne fruit</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.islandfruitguide.com/fruits/lychee</loc>
+    <lastmod>2025-08-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/fruit-images/fruit-lychee.png</image:loc>
+      <image:caption>Fresh Lychee tropical fruit – IslandFruitGuide</image:caption>
+      <image:title>Lychee (Litchi chinensis) – fragrant tropical fruit</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.islandfruitguide.com/fruits/stinking-toe</loc>
+    <lastmod>2025-08-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/fruit-images/fruit-stinking-toe.png</image:loc>
+      <image:caption>Fresh Stinking Toe (West Indian locust) fruit pod – IslandFruitGuide</image:caption>
+      <image:title>Stinking Toe (Hymenaea courbaril) – traditional Caribbean pod fruit</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.islandfruitguide.com/fruits/breadnut</loc>
+    <lastmod>2025-08-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/fruit-images/fruit-breadnut.png</image:loc>
+      <image:caption>Fresh Breadnut tropical fruit – IslandFruitGuide</image:caption>
+      <image:title>Breadnut (Artocarpus camansi) – protein-rich Caribbean seed fruit</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.islandfruitguide.com/fruits/rose-apple</loc>
+    <lastmod>2025-08-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/fruit-images/fruit-roseapple.jpeg</image:loc>
+      <image:caption>Fresh Rose Apple (Otaheite Apple) tropical fruit – IslandFruitGuide</image:caption>
+      <image:title>Rose Apple (Syzygium jambos) – fragrant Caribbean fruit</image:title>
+    </image:image>
+  </url>
+
+</urlset>

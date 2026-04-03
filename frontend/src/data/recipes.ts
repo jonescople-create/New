@@ -1,0 +1,724 @@
+export interface Recipe {
+  id: string;
+  title: string;
+  ingredients: string[];
+  instructions: string[];
+  related_fruit_ids: string[];
+  image_url: string;
+  slug: string;
+  prep_time: string;
+  cook_time: string;
+  servings: number;
+  difficulty: string;
+  description: string;
+}
+
+const SUPABASE_STORAGE = "https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public";
+
+export const recipes: Recipe[] = [
+  {
+    id: "r1",
+    title: "Jamaican Ackee and Saltfish",
+    ingredients: [
+      "1 can ackee (or 12 fresh ackee arils)",
+      "250g salted codfish",
+      "1 medium onion, sliced",
+      "2 tomatoes, diced",
+      "1 scotch bonnet pepper",
+      "3 stalks scallion, chopped",
+      "2 tbsp coconut oil",
+      "1 tsp black pepper",
+      "Fresh thyme sprigs"
+    ],
+    instructions: [
+      "Soak saltfish overnight or boil for 20 minutes, drain and flake.",
+      "Heat coconut oil in a large skillet over medium heat.",
+      "Sauté onions, tomatoes, scotch bonnet, and scallion for 3-4 minutes.",
+      "Add flaked saltfish and stir for 2 minutes.",
+      "Gently fold in ackee, being careful not to mash.",
+      "Add thyme and black pepper, cook for 3-5 minutes.",
+      "Serve with fried dumplings, breadfruit, or hard dough bread."
+    ],
+    related_fruit_ids: ["1", "2"],
+    image_url: `${SUPABASE_STORAGE}/recipe-images/recipe-ackee-and-saltfish.jpeg`,
+    slug: "jamaican-ackee-and-saltfish",
+    prep_time: "15 min",
+    cook_time: "25 min",
+    servings: 4,
+    difficulty: "Medium",
+    description: "Jamaica's beloved national dish combining creamy ackee with savory saltfish — a Caribbean breakfast classic packed with protein and island flavour."
+  },
+  {
+    id: "r2",
+    title: "Tropical Mango Chutney",
+    ingredients: [
+      "3 ripe mangoes, peeled and diced",
+      "1 medium onion, finely chopped",
+      "½ cup apple cider vinegar",
+      "½ cup brown sugar",
+      "1 scotch bonnet pepper, minced",
+      "2 cloves garlic, minced",
+      "1 tbsp fresh ginger, grated",
+      "½ tsp allspice",
+      "¼ tsp cinnamon",
+      "Salt to taste"
+    ],
+    instructions: [
+      "Combine vinegar and brown sugar in a heavy saucepan, stir over medium heat until dissolved.",
+      "Add onion, garlic, ginger, and scotch bonnet. Cook for 5 minutes.",
+      "Add diced mango, allspice, cinnamon, and salt.",
+      "Simmer on low heat for 30-40 minutes, stirring occasionally until thickened.",
+      "The chutney should be jammy but still have some fruit chunks.",
+      "Let cool completely before transferring to sterilized jars.",
+      "Serve with curried dishes, grilled meats, or as a dip with crackers."
+    ],
+    related_fruit_ids: ["5"],
+    image_url: `${SUPABASE_STORAGE}/recipe-images/recipe-mango-chutney.webp`,
+    slug: "tropical-mango-chutney",
+    prep_time: "15 min",
+    cook_time: "40 min",
+    servings: 8,
+    difficulty: "Easy",
+    description: "Sweet, spicy Caribbean mango chutney with scotch bonnet heat — perfect as a condiment for any island meal."
+  },
+  {
+    id: "r3",
+    title: "Soursop Juice (Caribbean Style)",
+    ingredients: [
+      "1 large ripe soursop",
+      "4 cups water",
+      "½ cup condensed milk",
+      "1 tsp vanilla extract",
+      "½ tsp nutmeg",
+      "Sugar to taste",
+      "Ice"
+    ],
+    instructions: [
+      "Peel soursop and remove all seeds from the white pulp.",
+      "Add pulp and water to a blender, blend for 30 seconds.",
+      "Strain through a fine mesh sieve, pressing pulp to extract all juice.",
+      "Add condensed milk, vanilla, and nutmeg. Blend again briefly.",
+      "Taste and add sugar if needed.",
+      "Serve over ice. Garnish with a dash of nutmeg."
+    ],
+    related_fruit_ids: ["3"],
+    image_url: `${SUPABASE_STORAGE}/recipe-images/recipe-soursop-juice.webp`,
+    slug: "soursop-juice-caribbean-style",
+    prep_time: "15 min",
+    cook_time: "0 min",
+    servings: 6,
+    difficulty: "Easy",
+    description: "Creamy, dreamy Caribbean soursop juice with condensed milk and nutmeg — a refreshing tropical drink bursting with antioxidants."
+  },
+  {
+    id: "r4",
+    title: "Guava Cheese (Guava Paste)",
+    ingredients: [
+      "2 lbs ripe guava",
+      "2 cups sugar",
+      "Juice of 1 lime",
+      "¼ cup water",
+      "Pinch of cinnamon"
+    ],
+    instructions: [
+      "Wash guavas, cut into quarters, and boil in water until very soft.",
+      "Push through a sieve to remove seeds, collecting smooth pulp.",
+      "Combine pulp, sugar, lime juice, and cinnamon in a heavy pot.",
+      "Cook over medium-low heat, stirring constantly for 40-50 minutes.",
+      "The mixture will thicken and pull away from the sides of the pot.",
+      "Pour into a greased pan and let cool completely.",
+      "Cut into squares. Serve with cheese or crackers."
+    ],
+    related_fruit_ids: ["10"],
+    image_url: `${SUPABASE_STORAGE}/recipe-images/recipe-guava-cheese.png`,
+    slug: "guava-cheese-paste",
+    prep_time: "20 min",
+    cook_time: "60 min",
+    servings: 12,
+    difficulty: "Medium",
+    description: "Traditional Caribbean guava paste (guava cheese) — a sweet, dense confection perfect with cream cheese and crackers."
+  },
+  {
+    id: "r5",
+    title: "Passion Fruit Mousse",
+    ingredients: [
+      "8 passion fruits",
+      "1 can condensed milk",
+      "1 cup heavy cream",
+      "1 tbsp gelatin powder",
+      "3 tbsp warm water",
+      "Fresh mint for garnish"
+    ],
+    instructions: [
+      "Cut passion fruits in half and scoop out pulp. Strain half for juice, keep half with seeds.",
+      "Dissolve gelatin in warm water and let bloom.",
+      "Whip heavy cream to soft peaks.",
+      "Mix condensed milk with passion fruit juice and dissolved gelatin.",
+      "Gently fold in whipped cream and seeded pulp.",
+      "Pour into serving glasses and refrigerate for 4+ hours.",
+      "Garnish with passion fruit seeds and fresh mint."
+    ],
+    related_fruit_ids: ["6"],
+    image_url: `${SUPABASE_STORAGE}/recipe-images/recipe-passion-fruit-mousse.png`,
+    slug: "passion-fruit-mousse",
+    prep_time: "20 min",
+    cook_time: "0 min",
+    servings: 6,
+    difficulty: "Medium",
+    description: "Silky smooth passion fruit mousse — a Brazilian-Caribbean fusion dessert that melts on your tongue with tropical tangy sweetness."
+  },
+  {
+    id: "r6",
+    title: "Papaya Smoothie Bowl",
+    ingredients: [
+      "1 large ripe papaya, cubed and frozen",
+      "1 banana, frozen",
+      "½ cup coconut milk",
+      "1 tbsp honey",
+      "Juice of ½ lime",
+      "Toppings: granola, chia seeds, shredded coconut, fresh fruit slices"
+    ],
+    instructions: [
+      "Scoop out papaya flesh, remove seeds, cube and freeze overnight.",
+      "Blend frozen papaya, banana, coconut milk, honey, and lime juice until thick and creamy.",
+      "Pour into a bowl — consistency should be thicker than a regular smoothie.",
+      "Top with granola, chia seeds, shredded coconut, and fresh fruit slices.",
+      "Drizzle extra honey on top if desired.",
+      "Serve immediately and enjoy this tropical breakfast bowl."
+    ],
+    related_fruit_ids: ["8", "13"],
+    image_url: `${SUPABASE_STORAGE}/recipe-images/recipe-papaya-smoothie.webp`,
+    slug: "papaya-smoothie-bowl",
+    prep_time: "10 min",
+    cook_time: "0 min",
+    servings: 2,
+    difficulty: "Easy",
+    description: "A vibrant, nutrient-packed papaya smoothie bowl bursting with Caribbean tropical flavor — rich in Vitamin C, fiber, and natural enzymes."
+  },
+  {
+    id: "r7",
+    title: "Tamarind Balls (Caribbean Candy)",
+    ingredients: [
+      "1 lb tamarind pulp (seeds removed)",
+      "1½ cups brown sugar",
+      "1 tsp salt",
+      "½ tsp cayenne pepper (optional)",
+      "Extra sugar for rolling"
+    ],
+    instructions: [
+      "Remove tamarind from shells and pull out seeds and stringy fibers.",
+      "Mix pulp with brown sugar, salt, and cayenne pepper in a bowl.",
+      "Knead the mixture until sugar is fully incorporated.",
+      "Roll into 1-inch balls between your palms.",
+      "Roll each ball in granulated sugar to coat.",
+      "Let set for 30 minutes before serving.",
+      "Store in an airtight container for up to 2 weeks."
+    ],
+    related_fruit_ids: ["12"],
+    image_url: `${SUPABASE_STORAGE}/recipe-images/recipe-tamarind-balls.png`,
+    slug: "tamarind-balls-caribbean-candy",
+    prep_time: "30 min",
+    cook_time: "0 min",
+    servings: 20,
+    difficulty: "Easy",
+    description: "Sweet, sour, and spicy Caribbean tamarind balls — a nostalgic island candy loved by all ages across the Caribbean."
+  },
+  {
+    id: "r8",
+    title: "Caribbean Coconut Drops",
+    ingredients: [
+      "2 cups grated dry coconut",
+      "2 cups brown sugar",
+      "1 tbsp fresh ginger, grated",
+      "½ cup water",
+      "1 tsp vanilla extract",
+      "Pinch of salt"
+    ],
+    instructions: [
+      "Combine brown sugar and water in a heavy pot over medium heat.",
+      "Stir until sugar dissolves and mixture begins to bubble.",
+      "Add grated coconut, ginger, vanilla, and salt.",
+      "Stir continuously as the mixture thickens, about 15-20 minutes.",
+      "The mixture is ready when it begins to pull away from the pot and a drop holds its shape on a cold surface.",
+      "Drop spoonfuls onto a greased baking sheet or banana leaf.",
+      "Let cool and harden completely before eating. Store in an airtight container."
+    ],
+    related_fruit_ids: ["11"],
+    image_url: `${SUPABASE_STORAGE}/recipe-images/recipe-coconut-drops.webp`,
+    slug: "caribbean-coconut-drops",
+    prep_time: "15 min",
+    cook_time: "25 min",
+    servings: 15,
+    difficulty: "Medium",
+    description: "Classic Jamaican coconut drops with ginger — a chewy, sweet, and spicy candy made with fresh coconut and brown sugar."
+  },
+  {
+    id: "r9",
+    title: "Pineapple Upside-Down Rum Cake",
+    ingredients: [
+      "1 fresh pineapple, cored and sliced into rings",
+      "½ cup butter",
+      "¾ cup brown sugar",
+      "6 maraschino cherries",
+      "1½ cups all-purpose flour",
+      "2 tsp baking powder",
+      "¾ cup sugar",
+      "2 eggs",
+      "½ cup coconut milk",
+      "3 tbsp dark Caribbean rum",
+      "1 tsp vanilla extract"
+    ],
+    instructions: [
+      "Preheat oven to 350°F. Melt butter in a 9-inch cast iron skillet.",
+      "Sprinkle brown sugar evenly over the melted butter.",
+      "Arrange pineapple rings and cherries in a decorative pattern on the brown sugar.",
+      "In a bowl, whisk flour, baking powder, and salt. In another bowl, cream sugar and eggs.",
+      "Add coconut milk, rum, and vanilla to the egg mixture.",
+      "Fold dry ingredients into wet ingredients until just combined.",
+      "Pour batter over pineapple arrangement and spread evenly.",
+      "Bake for 40-45 minutes until golden and a toothpick comes out clean.",
+      "Let cool 5 minutes, then flip onto a serving plate. Serve warm."
+    ],
+    related_fruit_ids: ["22", "11"],
+    image_url: `${SUPABASE_STORAGE}/recipe-images/recipe-pineapple-upside-down-rum-cake.png`,
+    slug: "pineapple-upside-down-rum-cake",
+    prep_time: "20 min",
+    cook_time: "45 min",
+    servings: 8,
+    difficulty: "Medium",
+    description: "A Caribbean twist on the classic pineapple upside-down cake with dark rum and coconut milk — irresistibly moist and caramelized."
+  },
+  {
+    id: "r10",
+    title: "June Plum Juice (Pommecythere Juice)",
+    ingredients: [
+      "6-8 ripe june plums (golden yellow)",
+      "4 cups water",
+      "½ cup sugar (adjust to taste)",
+      "Juice of 1 lime",
+      "Pinch of salt",
+      "Ice for serving"
+    ],
+    instructions: [
+      "Wash june plums and remove any blemishes.",
+      "Boil june plums in 2 cups of water for 10-15 minutes until very soft.",
+      "Let cool slightly, then remove the spiny seeds by pressing through a strainer.",
+      "Add the strained pulp to a blender with remaining 2 cups water.",
+      "Add sugar, lime juice, and salt. Blend until smooth.",
+      "Strain again for a smoother consistency if desired.",
+      "Chill and serve over ice. Stir before serving as pulp settles."
+    ],
+    related_fruit_ids: ["15"],
+    image_url: `${SUPABASE_STORAGE}/recipe-images/recipe-june-plum-juice.webp`,
+    slug: "june-plum-juice",
+    prep_time: "10 min",
+    cook_time: "15 min",
+    servings: 4,
+    difficulty: "Easy",
+    description: "Refreshing Caribbean june plum juice — sweet, tangy, and perfect for hot tropical days. Rich in Vitamin C and potassium."
+  },
+  {
+    id: "r11",
+    title: "Green June Plum Drink",
+    ingredients: [
+      "8-10 green june plums",
+      "4 cups water",
+      "¾ cup sugar",
+      "1 tsp salt",
+      "½ scotch bonnet pepper (optional)",
+      "Juice of 2 limes",
+      "Fresh mint leaves",
+      "Ice"
+    ],
+    instructions: [
+      "Wash green june plums and score with a knife to help release flavor.",
+      "Blend june plums with 2 cups water on pulse — don't over-blend the seeds.",
+      "Strain through a coarse strainer, pressing to extract all the tangy juice.",
+      "Add remaining water, sugar, salt, lime juice, and scotch bonnet.",
+      "Stir well until sugar dissolves.",
+      "Chill for at least 1 hour to let flavors meld.",
+      "Serve over ice with fresh mint leaves. The perfect sour-sweet island refresher."
+    ],
+    related_fruit_ids: ["15"],
+    image_url: `${SUPABASE_STORAGE}/recipe-images/recipe-unripe-juneplum-drink.jpeg`,
+    slug: "green-june-plum-drink",
+    prep_time: "15 min",
+    cook_time: "0 min",
+    servings: 6,
+    difficulty: "Easy",
+    description: "Tangy, tart green june plum drink with a hint of scotch bonnet — a refreshing Caribbean street-style beverage loved across the islands."
+  },
+  {
+    id: "r12",
+    title: "Starfruit Tropical Salad",
+    ingredients: [
+      "3 ripe starfruit, sliced into stars",
+      "1 mango, cubed",
+      "½ cup pomegranate seeds",
+      "2 cups mixed greens (arugula and spinach)",
+      "¼ red onion, thinly sliced",
+      "¼ cup candied nuts",
+      "2 tbsp olive oil",
+      "1 tbsp lime juice",
+      "1 tsp honey",
+      "Salt and pepper to taste",
+      "Fresh mint for garnish"
+    ],
+    instructions: [
+      "Wash starfruit and slice crosswise into thin star-shaped slices.",
+      "Arrange mixed greens on a large serving platter.",
+      "Top with starfruit stars, mango cubes, pomegranate seeds, and red onion.",
+      "Whisk together olive oil, lime juice, honey, salt, and pepper for the dressing.",
+      "Drizzle dressing over the salad.",
+      "Scatter candied nuts and fresh mint leaves on top.",
+      "Serve immediately as a stunning side dish or light lunch."
+    ],
+    related_fruit_ids: ["5"],
+    image_url: `${SUPABASE_STORAGE}/recipe-images/recipe-starfruit-dish.webp`,
+    slug: "starfruit-tropical-salad",
+    prep_time: "15 min",
+    cook_time: "0 min",
+    servings: 4,
+    difficulty: "Easy",
+    description: "A beautiful tropical salad featuring star-shaped starfruit slices with mango, pomegranate, and a zesty lime dressing."
+  },
+  {
+    id: "r13",
+    title: "Hog Plum Pepper Sauce",
+    ingredients: [
+      "20 ripe hog plums (yellow mombin)",
+      "4 scotch bonnet peppers",
+      "1 medium onion, roughly chopped",
+      "4 cloves garlic",
+      "1 tsp salt",
+      "½ cup apple cider vinegar",
+      "1 tbsp brown sugar",
+      "1 tsp allspice (pimento)",
+      "2 tbsp olive oil",
+      "Juice of 1 lime"
+    ],
+    instructions: [
+      "Wash hog plums and simmer in 1 cup of water for 15 minutes until the flesh softens and pulls away from the spiny seed.",
+      "Drain and allow to cool slightly, then press through a coarse strainer to extract the pulp, discarding seeds and skins.",
+      "In a saucepan, heat olive oil over medium heat and sauté onion and garlic until golden and fragrant, about 5 minutes.",
+      "Add scotch bonnet peppers, allspice, and brown sugar, stirring for 2 minutes.",
+      "Add the hog plum pulp, apple cider vinegar, lime juice, and salt. Stir to combine.",
+      "Simmer on low heat for 15–20 minutes, stirring frequently, until the sauce thickens to your desired consistency.",
+      "Cool slightly, then blend until smooth for a silky sauce or leave slightly chunky for texture.",
+      "Pour into sterilised bottles. Refrigerate and use within 4 weeks. Serve alongside jerk chicken, fried fish, or as a dipping sauce."
+    ],
+    related_fruit_ids: ["17"],
+    image_url: `${SUPABASE_STORAGE}/recipe-images/recipe-hog-plum-pepper-sauce.png`,
+    slug: "hog-plum-pepper-sauce",
+    prep_time: "15 min",
+    cook_time: "35 min",
+    servings: 10,
+    difficulty: "Easy",
+    description: "A bold, tangy Caribbean hog plum pepper sauce with scotch bonnet heat and allspice warmth — bottled island fire in every drop."
+  },
+  {
+    id: "r14",
+    title: "Sweetsop (Sugar Apple) Ice Cream",
+    ingredients: [
+      "4 ripe sweetsops (sugar apples)",
+      "1 cup heavy whipping cream",
+      "½ cup condensed milk",
+      "1 tsp vanilla extract",
+      "¼ tsp freshly grated nutmeg",
+      "Pinch of cinnamon",
+      "Pinch of salt",
+      "Juice of ½ lime"
+    ],
+    instructions: [
+      "Break open the ripe sweetsops and scoop out all the creamy white flesh, carefully removing and discarding every black seed — do not skip this step.",
+      "Push the pulp through a fine mesh strainer or cheesecloth to remove any remaining seed fragments and fibres, collecting smooth, silky pulp.",
+      "In a large chilled bowl, whip the heavy cream to soft peaks using a hand mixer.",
+      "Add the condensed milk, vanilla extract, nutmeg, cinnamon, salt, and lime juice to the whipped cream. Fold gently until combined.",
+      "Fold in the sweetsop pulp, keeping the mixture light and airy.",
+      "Pour into a freezer-safe container and smooth the top.",
+      "Cover tightly with plastic wrap pressed directly onto the surface to prevent ice crystals.",
+      "Freeze for a minimum of 6 hours, preferably overnight.",
+      "Remove from freezer 5 minutes before serving to soften slightly. Scoop and serve garnished with a light dusting of nutmeg."
+    ],
+    related_fruit_ids: ["20"],
+    image_url: `${SUPABASE_STORAGE}/recipe-images/recipe-sweetsop-icecream.png`,
+    slug: "sweetsop-ice-cream",
+    prep_time: "25 min",
+    cook_time: "0 min",
+    servings: 6,
+    difficulty: "Easy",
+    description: "Creamy, dreamy no-churn sweetsop ice cream bursting with natural vanilla-custard sweetness — a true Caribbean frozen treat with no artificial ingredients."
+  },
+  {
+    id: "r15",
+    title: "Homemade Sea Grape Wine",
+    ingredients: [
+      "4 lbs ripe sea grapes (deep purple, fully ripe)",
+      "1 gallon filtered water",
+      "2½ cups granulated sugar",
+      "1 packet wine yeast (or ¼ tsp active dry yeast)",
+      "1 tsp yeast nutrient",
+      "½ tsp acid blend (or juice of 2 limes)",
+      "¼ tsp potassium metabisulfite (Campden tablet) — optional, for clarity",
+      "Cheesecloth or muslin for straining",
+      "1-gallon glass fermentation jug",
+      "Airlock and bung"
+    ],
+    instructions: [
+      "Rinse sea grapes thoroughly under cold water and pick off any stems, leaves, or unripe berries. Only use deeply purple, fully ripe fruit.",
+      "Crush sea grapes by hand or in a food processor (pulse briefly). Place crushed fruit in a large sterilised bucket.",
+      "Dissolve sugar in 2 cups of warm water and pour over crushed fruit. Add remaining water. Stir well.",
+      "If using Campden tablet, crush and stir in now. Cover with a clean cloth and wait 24 hours before adding yeast.",
+      "After 24 hours, sprinkle wine yeast and yeast nutrient over the surface. Stir gently, then cover loosely.",
+      "Ferment at room temperature (75–80°F / 24–27°C) for 5–7 days, stirring the 'must' daily and pressing down the fruit cap.",
+      "After 7 days, strain the liquid through cheesecloth into a sterilised glass jug, squeezing pulp to extract all juice. Discard solids.",
+      "Fit the jug with an airlock. Leave to ferment undisturbed for 3–4 weeks until bubbling stops completely.",
+      "Carefully siphon (rack) the wine off the sediment into a clean sterilised jug. Seal and age for a further 4–8 weeks for best flavour.",
+      "Once clear and stable, bottle into sterilised wine bottles. Cork tightly. Age at least 2 weeks before drinking — or longer for a smoother wine.",
+      "Serve chilled. The finished wine should be a beautiful deep ruby-red with a fruity, slightly tart flavour unique to the Caribbean coastline."
+    ],
+    related_fruit_ids: ["21"],
+    image_url: `${SUPABASE_STORAGE}/recipe-images/recipe-homemade-seagrape-wine%20(1).jpeg`,
+    slug: "homemade-sea-grape-wine",
+    prep_time: "1 hour",
+    cook_time: "6-10 weeks (fermentation)",
+    servings: 12,
+    difficulty: "Advanced",
+    description: "A traditional Caribbean homemade sea grape wine — deep ruby-red, fruity, and slightly tart. Brewed from wild-harvested coastal sea grapes using an authentic island winemaking method passed down through generations."
+  },
+  {
+    id: "r16",
+    title: "Jamaican Ackee Porridge Breakfast Spread",
+    ingredients: [
+      "1 can ackee (or 12 fresh ackee arils)",
+      "1 cup coconut milk",
+      "½ cup rolled oats",
+      "1 tbsp honey or brown sugar (to taste)",
+      "½ tsp vanilla extract",
+      "¼ tsp ground nutmeg",
+      "¼ tsp ground cinnamon",
+      "Pinch of salt",
+      "1 tbsp lime juice",
+      "Optional: 1 ripe banana for extra sweetness"
+    ],
+    instructions: [
+      "If using saltfree canned ackee: drain and rinse gently. If using fresh ackee: ensure it opened naturally, remove seeds and red membrane, then boil arils for 5–10 minutes and drain.",
+      "In a small saucepan, bring coconut milk to a gentle simmer. Stir in the rolled oats and cook on low for 6–8 minutes until soft.",
+      "Add ackee to the pot and warm for 2 minutes.",
+      "Transfer mixture to a blender. Add honey (or brown sugar), vanilla, nutmeg, cinnamon, salt, and lime juice.",
+      "Blend until smooth and spreadable. For a thicker spread, blend longer; for a looser porridge texture, add a splash of water.",
+      "Taste and adjust sweetness and spices.",
+      "Serve warm as a porridge bowl or cool slightly and use as a breakfast spread on toast, pancakes, or crackers."
+    ],
+    related_fruit_ids: ["1", "11"],
+    image_url: `${SUPABASE_STORAGE}/recipe-images/recipe-jamaican-ackee-porridge-breakfast-spread.png`,
+    slug: "jamaican-ackee-porridge-breakfast-spread",
+    prep_time: "10 min",
+    cook_time: "10 min",
+    servings: 4,
+    difficulty: "Easy",
+    description: "A creamy Jamaican-style ackee breakfast porridge/spread blended with coconut milk, warm spices, and lime — perfect on toast or as a comforting bowl."
+  },
+  {
+    id: "r17",
+    title: "Rose Apple (Otaheite Apple) Juice",
+    ingredients: [
+      "6 rose apples (Otaheite apples), washed and chopped",
+      "3 cups cold water",
+      "2 tbsp honey or cane sugar (to taste)",
+      "Juice of 1 lime",
+      "Pinch of salt",
+      "Ice for serving"
+    ],
+    instructions: [
+      "Remove any bruised spots from the rose apples and discard the core/seeds.",
+      "Add chopped rose apples and water to a blender and blend for 30–45 seconds.",
+      "Strain through a fine mesh strainer into a pitcher, pressing gently to extract the juice.",
+      "Stir in lime juice, a pinch of salt, and sweetener to taste.",
+      "Chill for 30 minutes.",
+      "Serve over ice."
+    ],
+    related_fruit_ids: ["14"],
+    image_url: `${SUPABASE_STORAGE}/recipe-images/recipe-roseapple-juice.jpeg`,
+    slug: "rose-apple-juice",
+    prep_time: "10 min",
+    cook_time: "0 min",
+    servings: 4,
+    difficulty: "Easy",
+    description: "A refreshing Jamaican-style rose apple (Otaheite apple) juice — light, floral, and brightened with fresh lime."
+  },
+  {
+    id: "r18",
+    title: "Jamaican Banana Porridge",
+    ingredients: [
+      "2 ripe bananas, mashed",
+      "2 cups water",
+      "1 cup coconut milk",
+      "½ cup cornmeal",
+      "¼ tsp ground nutmeg",
+      "¼ tsp ground cinnamon",
+      "1 tsp vanilla extract",
+      "1–2 tbsp brown sugar (to taste)",
+      "Pinch of salt"
+    ],
+    instructions: [
+      "In a saucepan, whisk cornmeal into water over medium heat to prevent lumps.",
+      "Cook for 6–8 minutes, stirring, until it begins to thicken.",
+      "Add coconut milk, mashed bananas, salt, nutmeg, and cinnamon. Stir well.",
+      "Simmer on low for 5–7 minutes until creamy.",
+      "Stir in vanilla and sweeten to taste.",
+      "Serve warm."
+    ],
+    related_fruit_ids: ["13"],
+    image_url: `${SUPABASE_STORAGE}/recipe-images/recipe-banana-porridge%20(1).jpeg`,
+    slug: "jamaican-banana-porridge",
+    prep_time: "10 min",
+    cook_time: "15 min",
+    servings: 4,
+    difficulty: "Easy",
+    description: "Classic Jamaican banana porridge made with cornmeal and coconut milk — creamy, warming, and naturally energizing."
+  },
+  {
+    id: "r19",
+    title: "Papaya-Passion-Guava Elixir (Island Trio)",
+    ingredients: [
+      "3 cups ripe papaya, peeled & diced (~450 g)",
+      "1 cup guava flesh, chopped, seeds removed if possible (~180 g)",
+      "Pulp of 6 passion fruits (about ½ cup / scoop the seeds & juice)",
+      "½ cup coconut water or cold water (120 ml)",
+      "Juice of 1 lime (≈ 30 ml)",
+      "2 tbsp honey or agave (≈ 30 ml) — adjust to taste",
+      "1 cup ice (about 8–10 cubes)",
+      "Pinch of fine sea salt (optional — brightens flavor)",
+      "Optional: 1 small knob fresh ginger (2–3 mm slice) for a spicy kick",
+      "Optional: fresh mint for garnish",
+      "Optional: 30–45 ml white rum for cocktail version"
+    ],
+    instructions: [
+      "Prep fruit: peel, seed and chop papaya. Halve guavas and scoop out flesh; press through a sieve or pick out big seeds (guava seeds are edible but grainy). Halve passion fruits and scoop pulp into a bowl.",
+      "Add to blender in this order: papaya, guava, passion fruit pulp, coconut water, lime juice, honey, and a pinch of salt.",
+      "Blend on high until completely smooth (about 45–60 seconds). Stop, taste, and adjust: more honey for sweetness, more lime for acidity, or a splash more water for a thinner consistency.",
+      "If you prefer a seed-free, silky juice: pour the blended mixture through a fine mesh strainer into a pitcher, pressing with the back of a spoon. (If you like texture, skip straining.)",
+      "Add ice to the pitcher or return strained juice + ice to the blender and pulse once to chill and slightly froth.",
+      "Serve cold over ice, garnish with a lime wheel and mint. If making cocktails, add rum at the serving stage and stir gently."
+    ],
+    related_fruit_ids: ["8", "6", "10"],
+    image_url: "https://customer-assets.emergentagent.com/job_zip-site-clone/artifacts/zp7n0red_A%20realistic%20photogra.png",
+    slug: "papaya-passion-guava-elixir",
+    prep_time: "15 min",
+    cook_time: "5 min",
+    servings: 4,
+    difficulty: "Easy",
+    description: "Bright, tropical, and balanced — papaya's creaminess, passion fruit's tang, and guava's floral sweetness come together in this refreshing Island Trio elixir."
+  },
+  {
+    id: "r20",
+    title: "Lychee Lime Cooler",
+    ingredients: [
+      "2 cups fresh lychees, peeled and pitted",
+      "1 cup cold coconut water",
+      "Juice of 2 fresh limes (about ¼ cup)",
+      "1–2 tbsp honey or agave syrup (to taste)",
+      "1 cup ice",
+      "Small pinch of sea salt (optional but recommended)",
+      "Optional: fresh mint leaves",
+      "Optional: thin slices of cucumber (cooling effect)",
+      "Optional: sparkling water (to top)"
+    ],
+    instructions: [
+      "Add lychees, coconut water, lime juice, sweetener, salt, and ice to a blender.",
+      "Blend on high for 45 seconds until smooth and pale pearly-pink.",
+      "Taste and adjust sweetness or acidity.",
+      "Strain if desired for a clear, juice-style finish.",
+      "Serve over ice, garnish with mint or lime wheel."
+    ],
+    related_fruit_ids: ["24"],
+    image_url: "https://customer-assets.emergentagent.com/job_zip-site-clone/artifacts/8pdnipct_A%20glass%20jug%20filled%20w.png",
+    slug: "lychee-lime-cooler",
+    prep_time: "10 min",
+    cook_time: "0 min",
+    servings: 4,
+    difficulty: "Easy",
+    description: "Light, floral, and ultra-refreshing lychee drink with bright citrus finish — perfect for hot climates and hydration."
+  },
+  {
+    id: "r21",
+    title: "Dragon Fruit Coconut Refresher",
+    ingredients: [
+      "2 cups ripe dragon fruit (pink or white flesh), cubed",
+      "1 cup coconut milk (light) or coconut water",
+      "Juice of 1 lime",
+      "1 tbsp honey or agave (optional)",
+      "1 cup ice",
+      "Optional: ¼ banana (for extra creaminess)",
+      "Optional: chia seeds (nutrient boost)",
+      "Optional: vanilla extract (¼ tsp)"
+    ],
+    instructions: [
+      "Place dragon fruit, coconut liquid, lime juice, sweetener, and ice into blender.",
+      "Blend until creamy and evenly colored (45–60 seconds).",
+      "Adjust thickness with more coconut water if needed.",
+      "Serve immediately in clear glasses to showcase color."
+    ],
+    related_fruit_ids: ["18"],
+    image_url: "https://customer-assets.emergentagent.com/job_zip-site-clone/artifacts/gfh7nrwh_A%20Dragon%20Fruit%20Cocon.png",
+    slug: "dragon-fruit-coconut-refresher",
+    prep_time: "10 min",
+    cook_time: "0 min",
+    servings: 4,
+    difficulty: "Easy",
+    description: "Smooth, mildly sweet, and visually striking dragon fruit drink with creamy coconut body and soft citrus lift."
+  },
+  {
+    id: "r22",
+    title: "Lychee Dragon Fruit Splash",
+    ingredients: [
+      "1½ cups fresh dragon fruit (pink or white flesh), diced",
+      "1¼ cups peeled, pitted lychees (fresh or canned in juice, drained)",
+      "¾ cup cold coconut water (or filtered water)",
+      "Juice of 1 small lime (about 2 tbsp)",
+      "1–2 tbsp honey or agave syrup (to taste)",
+      "1 cup ice cubes",
+      "Pinch of sea salt (optional, enhances sweetness)",
+      "Optional: 4–5 fresh mint leaves (extra refreshing)",
+      "Optional: ½ tsp rose water (luxury floral note)",
+      "Optional: sparkling water (to top, for a fizzy version)",
+      "Optional: white rum or vodka (30–45 ml per glass, cocktail version)"
+    ],
+    instructions: [
+      "Prepare the fruit: Peel and cube the dragon fruit. Peel lychees and remove pits completely.",
+      "Blend: Add dragon fruit, lychees, coconut water, lime juice, sweetener, salt, and ice to a blender.",
+      "Blend until smooth: Blend on high for 45–60 seconds until vibrant pink and silky.",
+      "Taste & adjust: Adjust sweetness or acidity if needed. Add a splash more coconut water if too thick.",
+      "Strain (optional): For an ultra-smooth juice, strain through a fine mesh sieve. For texture, serve as-is.",
+      "Serve: Pour into chilled glasses over ice. Garnish with mint, a lychee, or dragon fruit slice.",
+      "Mocktail variation: Top with sparkling water and extra lime zest.",
+      "Cocktail variation: Add rum or vodka and stir gently."
+    ],
+    related_fruit_ids: ["24", "18"],
+    image_url: "https://customer-assets.emergentagent.com/job_zip-site-clone/artifacts/agv19o8x_A%20realistic%20photogra2.png",
+    slug: "lychee-dragon-fruit-splash",
+    prep_time: "10 min",
+    cook_time: "0 min",
+    servings: 4,
+    difficulty: "Easy",
+    description: "A light, floral, jewel-pink drink where sweet lychee meets the mellow freshness of dragon fruit — refreshing tropical recipe at its finest."
+  }
+];
+
+export const getRecipeBySlug = (slug: string): Recipe | undefined => {
+  return recipes.find(r => r.slug === slug);
+};
+
+export const getRecipesForFruit = (fruitId: string): Recipe[] => {
+  return recipes.filter(r => r.related_fruit_ids.includes(fruitId));
+};
+
+export const searchRecipes = (query: string): Recipe[] => {
+  const q = query.toLowerCase();
+  return recipes.filter(r =>
+    r.title.toLowerCase().includes(q) ||
+    r.description.toLowerCase().includes(q) ||
+    r.ingredients.some(i => i.toLowerCase().includes(q))
+  );
+};

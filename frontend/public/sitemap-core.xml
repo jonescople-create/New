@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+
+  <url>
+    <loc>https://www.islandfruitguide.com/</loc>
+    <lastmod>2025-06-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/brand-assets/banner-hero.webp</image:loc>
+      <image:caption>IslandFruitGuide — Caribbean tropical fruits hero banner</image:caption>
+      <image:title>IslandFruitGuide Homepage</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://raguzwxnrdanynjnppze.supabase.co/storage/v1/object/public/brand-assets/logo.png</image:loc>
+      <image:caption>IslandFruitGuide official logo</image:caption>
+      <image:title>IslandFruitGuide Logo</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.islandfruitguide.com/fruits</loc>
+    <lastmod>2025-06-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
+    <loc>https://www.islandfruitguide.com/recipes</loc>
+    <lastmod>2025-06-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
+    <loc>https://www.islandfruitguide.com/seasonal-fruits</loc>
+    <lastmod>2025-06-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://www.islandfruitguide.com/buy-fruits</loc>
+    <lastmod>2025-06-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://www.islandfruitguide.com/store</loc>
+    <lastmod>2025-06-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
+    <loc>https://www.islandfruitguide.com/about</loc>
+    <lastmod>2025-06-14</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <url>
+    <loc>https://www.islandfruitguide.com/contact</loc>
+    <lastmod>2025-06-14</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+  </url>
+</urlset>

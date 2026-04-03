@@ -1,0 +1,133 @@
+interface Testimonial {
+  name: string;
+  location: string;
+  avatar: string;
+  rating: number;
+  text: string;
+  product: string;
+  date: string;
+}
+
+const TESTIMONIALS: Testimonial[] = [
+  {
+    name: "Marcia Thompson",
+    location: "Jamaica → Toronto, Canada",
+    avatar: "MT",
+    rating: 5,
+    text: "Finally a guide that explains Caribbean fruits properly! The soursop chapter brought back so many memories of home. I made the soursop juice recipe three times this week — my kids love it.",
+    product: "Caribbean Fruit Encyclopedia",
+    date: "2 weeks ago"
+  },
+  {
+    name: "Andre Williams",
+    location: "Kingston, Jamaica",
+    avatar: "AW",
+    rating: 5,
+    text: "The Gym Energy Recipes book is exactly what I needed. I've replaced my expensive pre-workout supplements with the mango-banana blend and I have even more energy at the gym. Worth every penny.",
+    product: "Tropical Gym Energy Recipes",
+    date: "1 month ago"
+  },
+  {
+    name: "Sharon Baptiste",
+    location: "Trinidad → London, UK",
+    avatar: "SB",
+    rating: 5,
+    text: "The Healing Drinks guide is incredible. The soursop leaf tea recipe is exactly how my grandmother used to make it. I gave a copy to my whole family. The guava leaf section alone is worth it.",
+    product: "Tropical Superfruit Healing Drinks",
+    date: "3 weeks ago"
+  },
+  {
+    name: "Dr. Keisha Brown",
+    location: "Barbados",
+    avatar: "KB",
+    rating: 5,
+    text: "As a nutritionist I recommend these guides to my Caribbean clients all the time. The nutritional data is accurate, the recipes are practical, and it uses ingredients people can actually find.",
+    product: "Caribbean Medicinal Leaves Guide",
+    date: "1 month ago"
+  },
+  {
+    name: "Damian Reid",
+    location: "Jamaica → New York, USA",
+    avatar: "DR",
+    rating: 5,
+    text: "I was skeptical at first but the Fat Loss Smoothies book genuinely changed my routine. Down 11 lbs in 6 weeks just from replacing breakfast with the papaya-guava blend. Tastes amazing too.",
+    product: "Caribbean Smoothies for Fat Loss",
+    date: "5 weeks ago"
+  },
+  {
+    name: "Nicole Harris",
+    location: "Saint Lucia",
+    avatar: "NH",
+    rating: 5,
+    text: "The Mango Recipe Pack alone is worth having a mango tree! Chutney, smoothies, desserts — I never knew there were so many ways to use mango. The kids' favourites are the mango ice lollies.",
+    product: "Mango Recipe Collection",
+    date: "2 months ago"
+  }
+];
+
+function Stars({ count }: { count: number }) {
+  return (
+    <div className="flex gap-0.5">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <svg key={i} className={`w-4 h-4 ${i < count ? 'text-amber-400' : 'text-gray-200'}`}
+          viewBox="0 0 20 20" fill="currentColor">
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+        </svg>
+      ))}
+    </div>
+  );
+}
+
+interface CardProps { t: Testimonial; }
+
+function TestimonialCard({ t }: CardProps) {
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col gap-4 hover:shadow-md transition-shadow">
+      <div className="flex items-start gap-3">
+        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-leaf to-mango flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+          {t.avatar}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="font-bold text-charcoal text-sm">{t.name}</p>
+          <p className="text-xs text-charcoal-light">{t.location}</p>
+          <Stars count={t.rating} />
+        </div>
+        <span className="text-xs text-charcoal-light whitespace-nowrap">{t.date}</span>
+      </div>
+      <p className="text-sm text-charcoal-light leading-relaxed italic">"{t.text}"</p>
+      <div className="flex items-center gap-2 pt-2 border-t border-gray-50">
+        <span className="text-leaf text-xs">✓ Verified Purchase</span>
+        <span className="text-xs text-charcoal-light ml-auto">📖 {t.product}</span>
+      </div>
+    </div>
+  );
+}
+
+export function TestimonialsRow({ max = 3 }: { max?: number }) {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      {TESTIMONIALS.slice(0, max).map((t, i) => <TestimonialCard key={i} t={t} />)}
+    </div>
+  );
+}
+
+export function TestimonialsSection() {
+  return (
+    <section className="py-14 bg-gray-50">
+      <div className="max-w-6xl mx-auto px-4">
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 text-sm font-bold px-4 py-2 rounded-full mb-4">
+            ⭐⭐⭐⭐⭐ 4.9 average — 2,300+ happy customers
+          </div>
+          <h2 className="font-heading text-3xl font-bold text-charcoal mb-2">Real People. Real Results.</h2>
+          <p className="text-charcoal-light">Caribbean and tropical fruit lovers from around the world</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {TESTIMONIALS.map((t, i) => <TestimonialCard key={i} t={t} />)}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export { TESTIMONIALS };
